@@ -1,0 +1,604 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AmorEterno — Login</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,300;1,400&family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --rose: #e91e8c;
+    --rose-light: #f06292;
+    --rose-dark: #ad1457;
+    --gold: #d4af7a;
+    --cream: #fdf8f5;
+    --dark: #1a0a12;
+    --text: #3d1a2a;
+  }
+
+  html, body {
+    height: 100%;
+    font-family: 'DM Sans', sans-serif;
+    background: var(--dark);
+    overflow: hidden;
+  }
+
+  /* ── Canvas bg ── */
+  #canvas-bg {
+    position: fixed; inset: 0; z-index: 0;
+  }
+
+  /* ── Split layout ── */
+  .wrapper {
+    position: relative; z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    height: 100vh;
+  }
+
+  /* ── Left panel ── */
+  .left {
+    display: flex; flex-direction: column;
+    justify-content: center; align-items: center;
+    padding: 60px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .left::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(233,30,140,0.15), rgba(173,20,87,0.08));
+    backdrop-filter: blur(1px);
+  }
+
+  .brand {
+    position: relative; z-index: 1;
+    text-align: center;
+  }
+
+  .brand-icon {
+    width: 80px; height: 80px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    border-radius: 24px;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 36px;
+    margin: 0 auto 32px;
+    box-shadow: 0 20px 60px rgba(233,30,140,0.4);
+    animation: float 4s ease-in-out infinite;
+  }
+
+  @keyframes float {
+    0%,100%{transform:translateY(0) rotate(-2deg)}
+    50%{transform:translateY(-12px) rotate(2deg)}
+  }
+
+  .brand h1 {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 52px;
+    font-weight: 300;
+    color: white;
+    letter-spacing: -1px;
+    line-height: 1;
+  }
+
+  .brand h1 span {
+    color: var(--rose-light);
+    font-style: italic;
+  }
+
+  .brand p {
+    margin-top: 16px;
+    color: rgba(255,255,255,0.55);
+    font-size: 14px;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+  }
+
+  .features {
+    position: relative; z-index: 1;
+    margin-top: 60px;
+    display: flex; flex-direction: column; gap: 20px;
+    width: 100%; max-width: 360px;
+  }
+
+  .feature-item {
+    display: flex; align-items: center; gap: 16px;
+    padding: 16px 20px;
+    background: rgba(255,255,255,0.05);
+    border: 1px solid rgba(255,255,255,0.08);
+    border-radius: 14px;
+    backdrop-filter: blur(10px);
+    transition: all 0.3s;
+  }
+
+  .feature-item:hover {
+    background: rgba(233,30,140,0.12);
+    border-color: rgba(233,30,140,0.3);
+    transform: translateX(6px);
+  }
+
+  .feature-icon {
+    font-size: 24px;
+    width: 44px; height: 44px;
+    display: flex; align-items: center; justify-content: center;
+    background: rgba(233,30,140,0.15);
+    border-radius: 12px;
+    flex-shrink: 0;
+  }
+
+  .feature-text h4 {
+    font-size: 14px; font-weight: 500;
+    color: rgba(255,255,255,0.9);
+  }
+
+  .feature-text p {
+    font-size: 12px;
+    color: rgba(255,255,255,0.4);
+    margin-top: 2px;
+  }
+
+  /* ── Right panel ── */
+  .right {
+    display: flex; align-items: center; justify-content: center;
+    background: var(--cream);
+    padding: 60px;
+    position: relative;
+  }
+
+  .right::before {
+    content: '';
+    position: absolute;
+    top: -100px; right: -100px;
+    width: 400px; height: 400px;
+    background: radial-gradient(circle, rgba(233,30,140,0.08), transparent 70%);
+    pointer-events: none;
+  }
+
+  .form-card {
+    width: 100%; max-width: 400px;
+  }
+
+  .form-title {
+    font-family: 'Cormorant Garamond', serif;
+    font-size: 36px; font-weight: 400;
+    color: var(--text);
+    margin-bottom: 8px;
+  }
+
+  .form-subtitle {
+    font-size: 14px;
+    color: #9e7b8a;
+    margin-bottom: 40px;
+  }
+
+  /* tabs */
+  .tabs {
+    display: flex;
+    border-bottom: 2px solid #f0e0e8;
+    margin-bottom: 32px;
+  }
+
+  .tab {
+    flex: 1; padding: 12px;
+    text-align: center;
+    font-size: 14px; font-weight: 500;
+    color: #9e7b8a;
+    cursor: pointer;
+    border-bottom: 2px solid transparent;
+    margin-bottom: -2px;
+    transition: all 0.3s;
+  }
+
+  .tab.active {
+    color: var(--rose);
+    border-bottom-color: var(--rose);
+  }
+
+  /* forms */
+  .form-section { display: none; }
+  .form-section.active { display: block; }
+
+  .field {
+    margin-bottom: 20px;
+  }
+
+  .field label {
+    display: block;
+    font-size: 12px; font-weight: 500;
+    text-transform: uppercase; letter-spacing: 1.5px;
+    color: #9e7b8a;
+    margin-bottom: 8px;
+  }
+
+  .field input {
+    width: 100%; padding: 14px 18px;
+    background: white;
+    border: 1.5px solid #f0e0e8;
+    border-radius: 12px;
+    font-size: 15px;
+    color: var(--text);
+    font-family: 'DM Sans', sans-serif;
+    outline: none;
+    transition: all 0.3s;
+  }
+
+  .field input:focus {
+    border-color: var(--rose);
+    box-shadow: 0 0 0 4px rgba(233,30,140,0.08);
+  }
+
+  .btn-primary {
+    width: 100%; padding: 16px;
+    background: linear-gradient(135deg, var(--rose), var(--rose-dark));
+    color: white;
+    border: none; border-radius: 12px;
+    font-size: 15px; font-weight: 500;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    letter-spacing: 0.5px;
+    box-shadow: 0 8px 30px rgba(233,30,140,0.35);
+    transition: all 0.3s;
+    position: relative; overflow: hidden;
+  }
+
+  .btn-primary::before {
+    content: '';
+    position: absolute; inset: 0;
+    background: linear-gradient(135deg, rgba(255,255,255,0.2), transparent);
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+
+  .btn-primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 12px 40px rgba(233,30,140,0.45);
+  }
+
+  .btn-primary:hover::before { opacity: 1; }
+  .btn-primary:active { transform: translateY(0); }
+
+  .btn-primary:disabled {
+    opacity: 0.6; cursor: not-allowed; transform: none;
+  }
+
+  .divider {
+    display: flex; align-items: center; gap: 16px;
+    margin: 24px 0;
+  }
+
+  .divider::before,.divider::after {
+    content: ''; flex: 1;
+    height: 1px; background: #f0e0e8;
+  }
+
+  .divider span { font-size: 12px; color: #c0a0b0; }
+
+  .demo-btn {
+    width: 100%; padding: 14px;
+    background: transparent;
+    border: 1.5px solid #f0e0e8;
+    border-radius: 12px;
+    font-size: 14px; color: #9e7b8a;
+    font-family: 'DM Sans', sans-serif;
+    cursor: pointer;
+    transition: all 0.3s;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+
+  .demo-btn:hover {
+    border-color: var(--rose-light);
+    color: var(--rose);
+    background: rgba(233,30,140,0.04);
+  }
+
+  .alert {
+    padding: 12px 16px;
+    border-radius: 10px;
+    font-size: 13px;
+    margin-bottom: 16px;
+    display: none;
+  }
+
+  .alert.error { background: #fce8f0; color: #c0134a; border: 1px solid #f8c0d4; display: block; }
+  .alert.success { background: #e8f8ef; color: #0d6e3a; border: 1px solid #b0e8c8; display: block; }
+
+  .loading-dots span {
+    display: inline-block;
+    width: 5px; height: 5px;
+    background: white; border-radius: 50%;
+    margin: 0 2px;
+    animation: dot 1.4s ease-in-out infinite;
+  }
+  .loading-dots span:nth-child(2) { animation-delay: 0.2s; }
+  .loading-dots span:nth-child(3) { animation-delay: 0.4s; }
+
+  @keyframes dot {
+    0%,80%,100%{transform:scale(0);opacity:0.4}
+    40%{transform:scale(1);opacity:1}
+  }
+
+  .terms {
+    margin-top: 24px;
+    text-align: center;
+    font-size: 12px;
+    color: #b0909f;
+  }
+
+  @media (max-width: 768px) {
+    .wrapper { grid-template-columns: 1fr; }
+    .left { display: none; }
+    .right { padding: 40px 24px; }
+  }
+</style>
+</head>
+<body>
+
+<canvas id="canvas-bg"></canvas>
+
+<div class="wrapper">
+  <!-- LEFT -->
+  <div class="left">
+    <div class="brand">
+      <div class="brand-icon">💕</div>
+      <h1>Gold-Line<span>Saas</span></h1>
+      <p>Sites de amor que emocionam</p>
+    </div>
+
+    <div class="features">
+      <div class="feature-item">
+        <div class="feature-icon">🌹</div>
+        <div class="feature-text">
+          <h4>Site personalizado do casal</h4>
+          <p>Edite tudo: fotos, textos, cores e muito mais</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">⏱️</div>
+        <div class="feature-text">
+          <h4>Contador de tempo juntos</h4>
+          <p>Dias, horas, minutos em tempo real</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎵</div>
+        <div class="feature-text">
+          <h4>Playlist de músicas do casal</h4>
+          <p>As músicas que marcaram a história de vocês</p>
+        </div>
+      </div>
+      <div class="feature-item">
+        <div class="feature-icon">🎯</div>
+        <div class="feature-text">
+          <h4>Quiz especial do relacionamento</h4>
+          <p>Quantos detalhes ela sabe sobre você?</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RIGHT -->
+  <div class="right">
+    <div class="form-card">
+      <h2 class="form-title">Bem-vindo(a)</h2>
+      <p class="form-subtitle">Crie um site inesquecível para o Dia dos Namorados 💕</p>
+
+      <div class="tabs">
+        <div class="tab active" onclick="switchTab('login')">Entrar</div>
+        <div class="tab" onclick="switchTab('register')">Criar conta</div>
+      </div>
+
+      <div id="alert-box"></div>
+
+      <!-- LOGIN -->
+      <div id="login-form" class="form-section active">
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="login-email" placeholder="seu@email.com" value="demo@amor.com">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="login-password" placeholder="••••••••" value="123456">
+        </div>
+        <button class="btn-primary" onclick="login()" id="login-btn">Entrar na minha conta</button>
+
+        <div class="divider"><span>ou</span></div>
+        <button class="demo-btn" onclick="loginDemo()">
+          ✨ Entrar com conta demo
+        </button>
+      </div>
+
+      <!-- REGISTER -->
+      <div id="register-form" class="form-section">
+        <div class="field">
+          <label>Nome do casal</label>
+          <input type="text" id="reg-name" placeholder="Ex: Ana & João">
+        </div>
+        <div class="field">
+          <label>Email</label>
+          <input type="email" id="reg-email" placeholder="seu@email.com">
+        </div>
+        <div class="field">
+          <label>Senha</label>
+          <input type="password" id="reg-password" placeholder="Mínimo 6 caracteres">
+        </div>
+        <button class="btn-primary" onclick="register()" id="register-btn">Criar meu site de amor</button>
+      </div>
+
+      <p class="terms">Ao continuar, você concorda com nossos <a href="#" style="color:var(--rose)">Termos de Uso</a></p>
+    </div>
+  </div>
+</div>
+
+<script>
+// ── Canvas hearts background ──────────────────────────────────────────────────
+const canvas = document.getElementById('canvas-bg');
+const ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+}
+resize();
+window.addEventListener('resize', resize);
+
+const particles = Array.from({ length: 60 }, () => ({
+  x: Math.random() * window.innerWidth,
+  y: Math.random() * window.innerHeight,
+  size: Math.random() * 3 + 1,
+  speedX: (Math.random() - 0.5) * 0.4,
+  speedY: Math.random() * -0.6 - 0.2,
+  opacity: Math.random() * 0.4 + 0.1,
+  type: Math.random() > 0.7 ? 'heart' : 'dot'
+}));
+
+function drawHeart(x, y, size, opacity) {
+  ctx.save();
+  ctx.globalAlpha = opacity;
+  ctx.fillStyle = '#e91e8c';
+  ctx.beginPath();
+  ctx.moveTo(x, y);
+  const s = size;
+  ctx.bezierCurveTo(x, y - s, x - s * 2, y - s, x - s * 2, y);
+  ctx.bezierCurveTo(x - s * 2, y + s * 1.3, x, y + s * 2, x, y + s * 2);
+  ctx.bezierCurveTo(x, y + s * 2, x + s * 2, y + s * 1.3, x + s * 2, y);
+  ctx.bezierCurveTo(x + s * 2, y - s, x, y - s, x, y);
+  ctx.fill();
+  ctx.restore();
+}
+
+function animateParticles() {
+  ctx.clearRect(0, 0, canvas.width, canvas.height);
+  
+  // Dark gradient bg
+  const grad = ctx.createLinearGradient(0, 0, canvas.width, canvas.height);
+  grad.addColorStop(0, '#1a0a12');
+  grad.addColorStop(0.5, '#120818');
+  grad.addColorStop(1, '#0d0810');
+  ctx.fillStyle = grad;
+  ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+  particles.forEach(p => {
+    p.x += p.speedX;
+    p.y += p.speedY;
+    if (p.y < -20) { p.y = canvas.height + 20; p.x = Math.random() * canvas.width; }
+    if (p.x < -20) p.x = canvas.width + 20;
+    if (p.x > canvas.width + 20) p.x = -20;
+
+    if (p.type === 'heart') {
+      drawHeart(p.x, p.y, p.size * 1.5, p.opacity);
+    } else {
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, p.size, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(233,30,140,${p.opacity})`;
+      ctx.fill();
+    }
+  });
+
+  requestAnimationFrame(animateParticles);
+}
+animateParticles();
+
+// ── Auth logic ────────────────────────────────────────────────────────────────
+const API = '';
+
+function switchTab(tab) {
+  document.querySelectorAll('.tab').forEach((t, i) => {
+    t.classList.toggle('active', (tab === 'login' && i === 0) || (tab === 'register' && i === 1));
+  });
+  document.getElementById('login-form').classList.toggle('active', tab === 'login');
+  document.getElementById('register-form').classList.toggle('active', tab === 'register');
+  clearAlert();
+}
+
+function showAlert(msg, type = 'error') {
+  const box = document.getElementById('alert-box');
+  box.innerHTML = `<div class="alert ${type}">${msg}</div>`;
+}
+function clearAlert() {
+  document.getElementById('alert-box').innerHTML = '';
+}
+
+function setLoading(btnId, loading) {
+  const btn = document.getElementById(btnId);
+  if (loading) {
+    btn.disabled = true;
+    btn.innerHTML = `<div class="loading-dots"><span></span><span></span><span></span></div>`;
+  } else {
+    btn.disabled = false;
+    btn.innerHTML = btnId === 'login-btn' ? 'Entrar na minha conta' : 'Criar meu site de amor';
+  }
+}
+
+async function login() {
+  const email = document.getElementById('login-email').value;
+  const password = document.getElementById('login-password').value;
+  if (!email || !password) return showAlert('Preencha todos os campos');
+
+  setLoading('login-btn', true);
+  try {
+    const res = await fetch(`${API}/api/auth/login`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location.href = '/admin';
+  } catch (e) {
+    showAlert(e.message || 'Erro ao fazer login');
+  } finally {
+    setLoading('login-btn', false);
+  }
+}
+
+async function loginDemo() {
+  document.getElementById('login-email').value = 'demo@amor.com';
+  document.getElementById('login-password').value = '123456';
+  await login();
+}
+
+async function register() {
+  const name = document.getElementById('reg-name').value;
+  const email = document.getElementById('reg-email').value;
+  const password = document.getElementById('reg-password').value;
+  if (!name || !email || !password) return showAlert('Preencha todos os campos');
+  if (password.length < 6) return showAlert('Senha deve ter no mínimo 6 caracteres');
+
+  setLoading('register-btn', true);
+  try {
+    const res = await fetch(`${API}/api/auth/register`, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ name, email, password })
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.error);
+    localStorage.setItem('token', data.token);
+    localStorage.setItem('user', JSON.stringify(data.user));
+    window.location.href = '/admin';
+  } catch (e) {
+    showAlert(e.message || 'Erro ao criar conta');
+  } finally {
+    setLoading('register-btn', false);
+  }
+}
+
+// Enter key
+document.addEventListener('keydown', e => {
+  if (e.key === 'Enter') {
+    if (document.getElementById('login-form').classList.contains('active')) login();
+    else register();
+  }
+});
+
+// Already logged in?
+if (localStorage.getItem('token')) window.location.href = '/admin';
+</script>
+</body>
+</html>

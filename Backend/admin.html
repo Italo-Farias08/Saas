@@ -1,0 +1,1388 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>AmorEterno — Painel</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Cormorant+Garamond:ital,wght@0,300;0,400;0,600;1,400&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+<style>
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --rose:#e91e8c;--rose-light:#f06292;--rose-dark:#ad1457;
+  --gold:#d4af7a;
+  /* DARK THEME */
+  --bg:#0e0e12;
+  --surface:#18181f;
+  --surface2:#1f1f2a;
+  --surface3:#26263a;
+  --border:#2a2a3a;
+  --border2:#333350;
+  --white:#fff;
+  --text:#f0eef8;
+  --muted:#7a7a9a;
+  --muted2:#555570;
+  --sidebar:220px;--topbar:60px;
+}
+html,body{height:100%;font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text)}
+
+.app{display:flex;flex-direction:column;min-height:100vh}
+
+.topbar{
+  height:var(--topbar);background:var(--surface);border-bottom:1px solid var(--border);
+  display:flex;align-items:center;padding:0 16px;gap:12px;
+  position:sticky;top:0;z-index:200;flex-shrink:0;
+}
+.topbar-logo{font-family:'Cormorant Garamond',serif;font-size:20px;color:var(--text);display:flex;align-items:center;gap:8px;text-decoration:none;}
+.topbar-logo .icon{width:32px;height:32px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));border-radius:8px;display:flex;align-items:center;justify-content:center;font-size:16px;}
+.topbar-logo span{color:var(--rose);font-style:italic}
+.topbar-title{font-size:15px;font-weight:500;flex:1;text-align:center;color:var(--text)}
+.topbar-actions{display:flex;gap:8px;align-items:center;margin-left:auto}
+
+.btn{padding:8px 14px;border-radius:10px;font-size:13px;font-weight:500;font-family:'DM Sans',sans-serif;cursor:pointer;transition:all .2s;border:none;white-space:nowrap;}
+.btn-primary{background:linear-gradient(135deg,var(--rose),var(--rose-dark));color:#fff;box-shadow:0 2px 10px rgba(233,30,140,.3);}
+.btn-primary:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(233,30,140,.4)}
+.btn-primary:disabled{opacity:.6;cursor:not-allowed;transform:none}
+.btn-ghost{background:transparent;border:1.5px solid var(--border2);color:var(--muted)}
+.btn-ghost:hover{border-color:var(--rose);color:var(--rose)}
+.btn-icon{width:36px;height:36px;border-radius:9px;background:var(--surface2);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;font-size:16px;cursor:pointer;transition:.2s;flex-shrink:0;}
+.btn-icon:hover{background:rgba(233,30,140,.15);border-color:var(--rose)}
+
+@media(min-width:768px){
+  .app{flex-direction:row}
+  .topbar{display:none}
+  .sidebar{display:flex !important}
+  .mobile-nav{display:none !important}
+  .main-wrap{margin-left:var(--sidebar);flex:1}
+}
+
+.sidebar{
+  width:var(--sidebar);background:var(--surface);border-right:1px solid var(--border);
+  display:none;flex-direction:column;position:fixed;top:0;left:0;height:100vh;overflow-y:auto;z-index:300;
+}
+.sidebar-logo{padding:22px 18px 16px;border-bottom:1px solid var(--border);}
+.logo-mark{display:flex;align-items:center;gap:10px;font-family:'Cormorant Garamond',serif;font-size:21px;font-weight:400;color:var(--text);}
+.logo-mark .icon{width:36px;height:36px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));border-radius:10px;display:flex;align-items:center;justify-content:center;font-size:18px;box-shadow:0 4px 12px rgba(233,30,140,0.3);}
+.logo-mark span{color:var(--rose);font-style:italic}
+nav{flex:1;padding:12px 8px}
+.nav-label{font-size:10px;font-weight:600;letter-spacing:2px;text-transform:uppercase;color:var(--muted2);padding:8px 12px 4px;}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;font-size:13px;font-weight:500;color:var(--muted);cursor:pointer;transition:all .2s;margin-bottom:2px;}
+.nav-item:hover{background:rgba(255,255,255,.05);color:var(--text)}
+.nav-item.active{background:rgba(233,30,140,.14);color:var(--rose);border:1px solid rgba(233,30,140,.2);}
+.nav-item .ni{font-size:15px;width:20px;text-align:center}
+.sidebar-bottom{padding:14px 8px;border-top:1px solid var(--border)}
+.user-card{display:flex;align-items:center;gap:10px;padding:10px;border-radius:10px;background:var(--surface2);cursor:pointer;transition:.2s;}
+.user-card:hover{background:var(--surface3)}
+.user-avatar{width:34px;height:34px;border-radius:9px;background:linear-gradient(135deg,var(--rose),var(--rose-dark));display:flex;align-items:center;justify-content:center;font-size:15px;font-weight:600;color:#fff;flex-shrink:0;}
+.user-info h5{font-size:12px;font-weight:500;color:var(--text)}
+.user-info p{font-size:11px;color:var(--muted)}
+
+.main-wrap{flex:1;display:flex;flex-direction:column;min-height:0}
+.main{padding:20px 16px 80px;overflow-y:auto;flex:1}
+@media(min-width:768px){.main{padding:28px 28px 40px}}
+
+.desktop-bar{
+  display:none;padding:12px 28px;
+  background:var(--surface);border-bottom:1px solid var(--border);
+  align-items:center;justify-content:space-between;position:sticky;top:0;z-index:100;
+}
+@media(min-width:768px){.desktop-bar{display:flex}}
+.desktop-bar h1{font-size:16px;font-weight:500;color:var(--text)}
+.desktop-bar-actions{display:flex;gap:10px;align-items:center}
+.status-badge{display:flex;align-items:center;gap:6px;font-size:12px;color:var(--muted);}
+.status-dot{width:8px;height:8px;border-radius:50%;background:#333;flex-shrink:0}
+.status-dot.online{background:#22c55e}
+
+.mobile-nav{position:fixed;bottom:0;left:0;right:0;z-index:200;background:var(--surface);border-top:1px solid var(--border);display:flex;align-items:center;padding:0 4px;height:58px;}
+.mobile-nav-item{flex:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:2px;padding:6px 2px;cursor:pointer;border-radius:10px;transition:.2s;font-size:10px;color:var(--muted);font-weight:500;}
+.mobile-nav-item.active{color:var(--rose)}
+.mobile-nav-item .mni{font-size:20px}
+.mobile-nav-more{position:fixed;bottom:62px;left:0;right:0;z-index:199;background:var(--surface);border-top:1px solid var(--border);padding:12px 16px;display:none;flex-wrap:wrap;gap:8px;}
+.mobile-nav-more.open{display:flex}
+.more-item{flex:1;min-width:calc(50% - 4px);display:flex;align-items:center;gap:10px;padding:12px;border-radius:12px;background:var(--surface2);font-size:13px;font-weight:500;color:var(--text);cursor:pointer;transition:.2s;}
+.more-item:hover,.more-item.active{background:rgba(233,30,140,.12);color:var(--rose)}
+
+.panel{display:none}
+.panel.active{display:block}
+
+/* CARDS */
+.section-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:16px;padding:20px;margin-bottom:16px;
+}
+.section-header{display:flex;align-items:flex-start;justify-content:space-between;margin-bottom:18px;gap:8px;flex-wrap:wrap;}
+.section-title{font-size:15px;font-weight:600;color:var(--text)}
+.section-sub{font-size:12px;color:var(--muted);margin-top:2px}
+
+/* STATS */
+.stats-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:16px}
+@media(min-width:640px){.stats-grid{grid-template-columns:repeat(4,1fr)}}
+.stat-card{
+  background:var(--surface);border:1px solid var(--border);border-radius:14px;padding:16px;
+  position:relative;overflow:hidden;
+}
+.stat-card::before{
+  content:'';position:absolute;top:-30px;right:-20px;
+  width:80px;height:80px;
+  border-radius:50%;
+  background:radial-gradient(circle,rgba(233,30,140,.08),transparent 70%);
+  pointer-events:none;
+}
+.stat-label{font-size:10px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);display:flex;justify-content:space-between;align-items:center}
+.stat-icon{font-size:18px}
+.stat-value{font-size:28px;font-weight:300;font-family:'Cormorant Garamond',serif;color:var(--text);margin:6px 0 2px;line-height:1}
+.stat-sub{font-size:11px;color:var(--muted2)}
+
+.publish-banner{
+  background:linear-gradient(135deg,rgba(233,30,140,.18),rgba(173,20,87,.1));
+  border:1px solid rgba(233,30,140,.3);
+  border-radius:16px;padding:20px;margin-bottom:16px;
+  display:flex;flex-direction:column;gap:12px;color:var(--text);
+  position:relative;overflow:hidden;
+}
+.publish-banner::before{
+  content:'';position:absolute;right:-40px;top:-40px;
+  width:150px;height:150px;
+  background:radial-gradient(circle,rgba(233,30,140,.15),transparent 70%);
+  pointer-events:none;
+}
+@media(min-width:480px){.publish-banner{flex-direction:row;align-items:center;padding:22px 26px}}
+.publish-banner h3{font-size:16px;font-weight:600;margin-bottom:3px}
+.publish-banner p{font-size:12px;color:var(--muted)}
+.btn-white{background:#fff;color:var(--rose);font-size:13px;font-weight:600;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;white-space:nowrap;align-self:flex-start;}
+@media(min-width:480px){.btn-white{align-self:auto;flex-shrink:0;margin-left:auto}}
+.btn-white:hover{transform:translateY(-1px);box-shadow:0 4px 16px rgba(233,30,140,.4)}
+
+.url-preview{display:flex;align-items:center;gap:8px;padding:10px 14px;background:var(--surface2);border-radius:10px;font-size:12px;color:var(--muted);border:1.5px solid var(--border);margin-top:8px;overflow:hidden;word-break:break-all;}
+.url-preview strong{color:var(--rose)}
+
+/* FORM */
+.form-row{display:grid;grid-template-columns:1fr;gap:14px;margin-bottom:14px}
+@media(min-width:480px){.form-row{grid-template-columns:1fr 1fr}}
+.form-group{margin-bottom:14px}
+.form-group label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px;}
+.form-group input,.form-group textarea,.form-group select{
+  width:100%;padding:10px 12px;
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:10px;font-size:14px;color:var(--text);
+  font-family:'DM Sans',sans-serif;outline:none;transition:.2s;-webkit-appearance:none;
+}
+.form-group input:focus,.form-group textarea:focus,.form-group select:focus{
+  border-color:var(--rose);box-shadow:0 0 0 3px rgba(233,30,140,.1)
+}
+.form-group input::placeholder,.form-group textarea::placeholder{color:var(--muted2)}
+.form-group textarea{resize:vertical;min-height:90px}
+
+/* COLORS */
+.color-row{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-bottom:14px}
+.color-item label{display:block;font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:6px}
+.color-item input[type=color]{width:100%;height:42px;border:1.5px solid var(--border);border-radius:10px;padding:4px;cursor:pointer;background:var(--surface2);}
+
+/* TOGGLE */
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:12px 0;border-bottom:1px solid var(--border)}
+.toggle-row:last-child{border:none}
+.toggle-info h4{font-size:13px;font-weight:500;color:var(--text)}
+.toggle-info p{font-size:11px;color:var(--muted);margin-top:2px}
+.toggle{position:relative;width:42px;height:24px;flex-shrink:0}
+.toggle input{opacity:0;width:0;height:0}
+.toggle-slider{position:absolute;inset:0;background:var(--surface3);border-radius:24px;cursor:pointer;transition:.3s;}
+.toggle-slider::before{content:'';position:absolute;width:18px;height:18px;left:3px;top:3px;background:#fff;border-radius:50%;transition:.3s;box-shadow:0 1px 4px rgba(0,0,0,.4);}
+.toggle input:checked+.toggle-slider{background:var(--rose)}
+.toggle input:checked+.toggle-slider::before{transform:translateX(18px)}
+
+/* PHOTO UPLOAD */
+.profile-upload-zone{display:flex;flex-direction:column;align-items:center;gap:16px;padding:24px;border:2px dashed var(--border);border-radius:16px;cursor:pointer;transition:.2s;background:var(--surface2);}
+.profile-upload-zone:hover{border-color:var(--rose);background:rgba(233,30,140,.05)}
+.profile-preview{width:120px;height:120px;border-radius:50%;object-fit:cover;border:3px solid rgba(233,30,140,.4);}
+.profile-placeholder{width:120px;height:120px;border-radius:50%;background:rgba(233,30,140,.1);display:flex;align-items:center;justify-content:center;font-size:40px;}
+
+.photos-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+@media(min-width:480px){.photos-grid{grid-template-columns:repeat(4,1fr)}}
+.photo-item{position:relative;border-radius:10px;overflow:hidden;aspect-ratio:1;background:var(--surface2);border:1.5px solid var(--border);}
+.photo-item img{width:100%;height:100%;object-fit:cover;display:block}
+.photo-remove{position:absolute;top:4px;right:4px;width:22px;height:22px;border-radius:50%;background:rgba(0,0,0,.7);color:#fff;border:none;cursor:pointer;font-size:12px;display:flex;align-items:center;justify-content:center;opacity:0;transition:.2s;}
+.photo-item:hover .photo-remove,.photo-item:active .photo-remove{opacity:1}
+.photo-add{border:2px dashed var(--border);border-radius:10px;aspect-ratio:1;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:4px;cursor:pointer;transition:.2s;color:var(--muted);font-size:11px;text-align:center;padding:8px;}
+.photo-add:hover{border-color:var(--rose);color:var(--rose)}
+.photo-add-icon{font-size:22px}
+
+.progress-bar{width:100%;height:3px;background:var(--surface3);border-radius:3px;overflow:hidden}
+.progress-fill{height:100%;background:var(--rose);border-radius:3px;transition:width .3s}
+
+/* ── MILESTONES — NOVO com foto ── */
+.milestone-item{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;margin-bottom:10px;overflow:hidden;
+  transition:.2s;
+}
+.milestone-item:hover{border-color:var(--border2)}
+.milestone-header{display:flex;gap:10px;padding:14px;align-items:flex-start;}
+.milestone-emoji{font-size:24px;flex-shrink:0;cursor:pointer;align-self:flex-start;margin-top:2px;transition:.2s;}
+.milestone-emoji:hover{transform:scale(1.2)}
+.milestone-fields{flex:1;min-width:0;display:grid;gap:6px;}
+.milestone-fields input{
+  width:100%;background:var(--surface3);border:1.5px solid var(--border);
+  border-radius:8px;outline:none;font-family:'DM Sans',sans-serif;
+  color:var(--text);padding:7px 10px;font-size:13px;transition:.2s;
+}
+.milestone-fields input::placeholder{color:var(--muted2)}
+.milestone-fields input:focus{border-color:var(--rose);background:var(--surface)}
+.icon-btn{width:30px;height:30px;border-radius:8px;border:none;cursor:pointer;background:transparent;font-size:13px;display:flex;align-items:center;justify-content:center;transition:.2s;color:var(--muted);flex-shrink:0;align-self:flex-start;}
+.icon-btn:hover{background:rgba(233,30,140,.15);color:var(--rose)}
+
+/* Seção de foto do milestone */
+.milestone-photo-section{
+  padding:10px 14px 14px 14px;
+  border-top:1px solid var(--border);
+  background:rgba(233,30,140,.03);
+}
+.milestone-photo-label{font-size:11px;font-weight:600;letter-spacing:1px;text-transform:uppercase;color:var(--muted);margin-bottom:8px;}
+.milestone-photo-row{display:flex;gap:10px;align-items:center;flex-wrap:wrap;}
+.milestone-thumb{
+  width:56px;height:56px;border-radius:10px;object-fit:cover;
+  border:2px solid rgba(233,30,140,.35);flex-shrink:0;
+  cursor:pointer;transition:.2s;
+}
+.milestone-thumb:hover{border-color:var(--rose);transform:scale(1.05)}
+.milestone-no-photo{
+  width:56px;height:56px;border-radius:10px;
+  background:var(--surface3);border:2px dashed var(--border2);
+  display:flex;align-items:center;justify-content:center;
+  font-size:22px;flex-shrink:0;cursor:pointer;transition:.2s;
+}
+.milestone-no-photo:hover{border-color:var(--rose);background:rgba(233,30,140,.08)}
+.milestone-photo-actions{display:flex;flex-direction:column;gap:6px;}
+.milestone-photo-btn{
+  padding:6px 12px;border-radius:8px;font-size:12px;font-weight:500;
+  cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;border:1.5px solid var(--border2);
+  background:transparent;color:var(--muted);white-space:nowrap;
+}
+.milestone-photo-btn:hover{border-color:var(--rose);color:var(--rose);background:rgba(233,30,140,.08)}
+.milestone-photo-caption-input{
+  flex:1;min-width:120px;padding:6px 10px;
+  background:var(--surface3);border:1.5px solid var(--border);
+  border-radius:8px;font-family:'DM Sans',sans-serif;
+  font-size:12px;color:var(--text);outline:none;transition:.2s;
+}
+.milestone-photo-caption-input::placeholder{color:var(--muted2)}
+.milestone-photo-caption-input:focus{border-color:var(--rose)}
+.milestone-url-row{display:flex;gap:6px;margin-top:6px;width:100%;}
+.milestone-url-row input{
+  flex:1;padding:6px 10px;background:var(--surface3);border:1.5px solid var(--border);
+  border-radius:8px;font-family:'DM Sans',sans-serif;font-size:12px;
+  color:var(--text);outline:none;transition:.2s;
+}
+.milestone-url-row input::placeholder{color:var(--muted2)}
+.milestone-url-row input:focus{border-color:var(--rose)}
+.milestone-url-row button{
+  padding:6px 12px;border-radius:8px;font-size:12px;font-weight:600;
+  cursor:pointer;background:var(--rose);color:#fff;border:none;transition:.2s;font-family:'DM Sans',sans-serif;
+}
+.milestone-url-row button:hover{background:var(--rose-dark)}
+
+/* PLAYLIST */
+.playlist-item{
+  background:var(--surface2);border:1.5px solid var(--border);
+  border-radius:14px;margin-bottom:10px;overflow:hidden;transition:.2s;
+}
+.playlist-item:focus-within{border-color:rgba(233,30,140,.35)}
+.playlist-item-header{display:flex;align-items:center;gap:12px;padding:12px 14px;}
+.playlist-drag{color:var(--muted2);font-size:14px;cursor:grab;flex-shrink:0}
+.playlist-num{width:26px;height:26px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--rose-dark));color:#fff;font-size:11px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.playlist-fields{flex:1;display:grid;grid-template-columns:1fr 1fr;gap:8px;min-width:0}
+@media(max-width:400px){.playlist-fields{grid-template-columns:1fr}}
+.playlist-fields input{
+  padding:7px 10px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:'DM Sans',sans-serif;font-size:13px;outline:none;
+  background:var(--surface3);color:var(--text);transition:.2s;width:100%;
+}
+.playlist-fields input::placeholder{color:var(--muted2)}
+.playlist-fields input:focus{border-color:var(--rose)}
+.yt-link-section{padding:10px 14px 12px 52px;border-top:1px solid var(--border);background:rgba(255,0,0,.02);}
+.yt-link-label{font-size:11px;color:var(--muted);margin-bottom:6px;display:flex;align-items:center;gap:6px;}
+.yt-link-label strong{color:var(--text)}
+.yt-input-row{display:flex;gap:8px;align-items:center}
+.yt-input-row input{
+  flex:1;padding:8px 12px;border:1.5px solid var(--border);border-radius:8px;
+  font-family:monospace;font-size:12px;outline:none;background:var(--surface3);
+  color:var(--text);transition:.2s;
+}
+.yt-input-row input:focus{border-color:#ff0000;box-shadow:0 0 0 3px rgba(255,0,0,.06)}
+.yt-input-row input.has-value{border-color:#22c55e;background:rgba(34,197,94,.06)}
+.yt-preview-btn{flex-shrink:0;padding:7px 12px;border-radius:8px;border:none;background:#ff0000;color:#fff;font-size:12px;font-weight:600;cursor:pointer;transition:.2s;font-family:'DM Sans',sans-serif;display:flex;align-items:center;gap:5px;}
+.yt-preview-btn:hover{background:#cc0000;transform:translateY(-1px)}
+.yt-preview-btn:disabled{opacity:.5;cursor:default;transform:none}
+.yt-status{font-size:11px;margin-top:6px;display:flex;align-items:center;gap:5px}
+.yt-status.ok{color:#22c55e}
+.yt-status.err{color:#ef4444}
+.yt-status.empty{color:var(--muted)}
+
+/* QUIZ */
+.quiz-question-item{background:var(--surface2);border-radius:14px;padding:14px;margin-bottom:12px;border:1.5px solid var(--border);}
+.quiz-q-header{display:flex;gap:8px;align-items:flex-start;margin-bottom:10px}
+.quiz-q-num{width:26px;height:26px;border-radius:50%;background:var(--rose);color:#fff;font-size:12px;font-weight:600;display:flex;align-items:center;justify-content:center;flex-shrink:0;}
+.quiz-q-input{flex:1;padding:6px 10px;border:1.5px solid var(--border);border-radius:8px;font-family:'DM Sans',sans-serif;font-size:13px;outline:none;background:var(--surface3);color:var(--text);transition:.2s;}
+.quiz-q-input::placeholder{color:var(--muted2)}
+.quiz-q-input:focus{border-color:var(--rose)}
+.quiz-options-grid{display:grid;grid-template-columns:1fr 1fr;gap:6px;margin-top:8px}
+.quiz-option-item{display:flex;gap:6px;align-items:center;padding:6px 10px;border-radius:8px;background:var(--surface3);border:1.5px solid var(--border);cursor:pointer;transition:.2s;}
+.quiz-option-item.correct{background:rgba(34,197,94,.1);border-color:#22c55e}
+.quiz-option-item input{flex:1;border:none;outline:none;font-size:12px;font-family:'DM Sans',sans-serif;background:transparent;color:var(--text);min-width:0;}
+.quiz-option-item input::placeholder{color:var(--muted2)}
+.quiz-correct-badge{font-size:10px;color:#22c55e;font-weight:600;white-space:nowrap;}
+.quiz-option-btn{width:20px;height:20px;border-radius:50%;border:2px solid var(--border2);background:transparent;cursor:pointer;flex-shrink:0;transition:.2s;}
+.quiz-option-btn.selected{background:var(--rose);border-color:var(--rose)}
+
+/* EFFECTS */
+.effects-grid{display:grid;grid-template-columns:repeat(2,1fr);gap:10px}
+@media(min-width:480px){.effects-grid{grid-template-columns:repeat(4,1fr)}}
+.effect-card{border:2px solid var(--border);border-radius:12px;padding:14px 10px;text-align:center;cursor:pointer;transition:.2s;background:var(--surface2);}
+.effect-card:hover,.effect-card.selected{border-color:var(--rose);background:rgba(233,30,140,.1);color:var(--rose);}
+.effect-card .eff-icon{font-size:28px;display:block;margin-bottom:6px}
+.effect-card span{font-size:12px;font-weight:500;color:var(--text)}
+.effect-card.selected span{color:var(--rose)}
+
+/* QR */
+.qr-wrapper{display:flex;flex-direction:column;align-items:center;gap:20px;padding:24px;background:var(--surface2);border-radius:16px;border:1.5px solid var(--border);}
+.qr-canvas-wrap{background:#fff;padding:16px;border-radius:14px;box-shadow:0 4px 20px rgba(233,30,140,.15);border:1px solid var(--border);display:inline-block;}
+#qr-placeholder{width:200px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;color:var(--muted);font-size:12px;text-align:center;}
+.qr-actions{display:flex;gap:10px;flex-wrap:wrap;justify-content:center}
+.qr-url-display{font-size:12px;color:var(--muted);word-break:break-all;text-align:center;padding:8px 14px;background:var(--surface3);border-radius:8px;border:1px solid var(--border);max-width:320px;}
+
+/* PREVIEW */
+.preview-wrap{border-radius:14px;overflow:hidden;border:1px solid var(--border)}
+.preview-bar{background:var(--surface2);padding:8px 14px;display:flex;align-items:center;gap:8px;border-bottom:1px solid var(--border);}
+.preview-dot{width:9px;height:9px;border-radius:50%}
+.preview-url{flex:1;background:var(--surface3);border-radius:6px;padding:4px 10px;font-size:11px;color:var(--muted);border:1px solid var(--border);font-family:monospace;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;}
+iframe{width:100%;height:calc(100vh - 180px);border:none;display:block;min-height:400px}
+@media(min-width:768px){iframe{height:600px}}
+
+.cd-display{font-family:'Cormorant Garamond',serif;font-size:32px;color:var(--rose);font-weight:300;}
+.cd-display span{display:inline-block;background:rgba(233,30,140,.1);padding:4px 10px;border-radius:8px;margin:0 2px;}
+
+/* TOAST */
+#toast{position:fixed;bottom:72px;left:50%;transform:translateX(-50%) translateY(20px);z-index:9999;background:var(--surface);color:var(--text);padding:12px 20px;border-radius:12px;font-size:13px;box-shadow:0 8px 30px rgba(0,0,0,.5);border:1px solid var(--border2);opacity:0;transition:.35s cubic-bezier(.175,.885,.32,1.275);white-space:nowrap;}
+#toast.show{transform:translateX(-50%) translateY(0);opacity:1}
+@media(min-width:768px){#toast{bottom:28px}}
+
+.mobile-save{position:fixed;bottom:66px;right:14px;z-index:199;width:50px;height:50px;border-radius:50%;background:linear-gradient(135deg,var(--rose),var(--rose-dark));border:none;font-size:20px;cursor:pointer;box-shadow:0 4px 20px rgba(233,30,140,.5);display:flex;align-items:center;justify-content:center;transition:.2s;}
+.mobile-save:hover{transform:scale(1.1)}
+@media(min-width:768px){.mobile-save{display:none}}
+
+.sidebar-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:299;}
+.sidebar-overlay.open{display:block}
+
+/* Hint box */
+.hint-box{margin-top:14px;padding:14px;background:rgba(255,200,0,.05);border-radius:12px;border:1px solid rgba(255,200,0,.15);}
+.hint-box .hint-title{font-size:13px;font-weight:600;color:var(--text);margin-bottom:8px;}
+.hint-box ol,.hint-box ul{font-size:12px;color:var(--muted);padding-left:18px;line-height:2}
+.hint-box a{color:var(--rose)}
+.hint-box code{background:rgba(255,255,255,.08);padding:1px 5px;border-radius:4px;font-family:monospace}
+</style>
+</head>
+<body>
+
+<header class="topbar" id="mobile-topbar">
+  <div class="btn-icon" onclick="toggleMobileSidebar()">☰</div>
+  <div class="topbar-title" id="topbar-title">Dashboard</div>
+  <div class="btn-icon" onclick="openSite()" title="Ver site">🔗</div>
+</header>
+
+<div class="app">
+  <div class="sidebar-overlay" id="sidebar-overlay" onclick="closeMobileSidebar()"></div>
+
+  <aside class="sidebar" id="sidebar">
+    <div class="sidebar-logo">
+      <div class="logo-mark">
+        <div>💕</div>
+        <div>Gold-Line<span>Saas</span></div>
+      </div>
+    </div>
+    <nav>
+      <div class="nav-label">Geral</div>
+      <div class="nav-item active" onclick="showPanel('dashboard')"><span class="ni">📊</span>Dashboard</div>
+      <div class="nav-item" onclick="showPanel('preview')"><span class="ni">👁️</span>Visualizar Site</div>
+      <div class="nav-item" onclick="showPanel('qrcode')"><span class="ni">📲</span>QR Code</div>
+
+      <div class="nav-label" style="margin-top:8px">Editar</div>
+      <div class="nav-item" onclick="showPanel('content')"><span class="ni">✏️</span>Textos & Conteúdo</div>
+      <div class="nav-item" onclick="showPanel('photos')"><span class="ni">📸</span>Fotos & Perfil</div>
+      <div class="nav-item" onclick="showPanel('milestones')"><span class="ni">🌟</span>Momentos</div>
+      <div class="nav-item" onclick="showPanel('playlist')"><span class="ni">🎵</span>Playlist</div>
+      <div class="nav-item" onclick="showPanel('quiz')"><span class="ni">🎯</span>Quiz</div>
+      <div class="nav-item" onclick="showPanel('design')"><span class="ni">🎨</span>Design & Efeitos</div>
+      <div class="nav-item" onclick="showPanel('settings')"><span class="ni">⚙️</span>Configurações</div>
+    </nav>
+    <div class="sidebar-bottom">
+      <div class="user-card">
+        <div class="user-avatar" id="user-avatar">💕</div>
+        <div class="user-info">
+          <h5 id="user-name-sidebar">Carregando...</h5>
+          <p id="user-plan-sidebar">Plano Free</p>
+        </div>
+      </div>
+    </div>
+  </aside>
+
+  <div class="main-wrap">
+    <div class="desktop-bar">
+      <h1 id="panel-title-desktop">Dashboard</h1>
+      <div class="desktop-bar-actions">
+        <div class="status-badge">
+          <div class="status-dot" id="status-dot"></div>
+          <span id="status-label">Rascunho</span>
+        </div>
+        <button class="btn btn-ghost" onclick="openSite()">🔗 Ver site</button>
+        <button class="btn btn-primary" onclick="saveConfig()" id="save-btn">💾 Salvar</button>
+        <button class="btn btn-ghost" onclick="logout()" style="padding:8px 12px">Sair</button>
+      </div>
+    </div>
+
+    <main class="main">
+
+      <!-- DASHBOARD -->
+      <div id="panel-dashboard" class="panel active">
+        <div class="publish-banner" id="publish-banner">
+          <div>
+            <h3>🚀 Seu site está pronto!</h3>
+            <p id="site-status-text">Publique e compartilhe com quem você ama</p>
+          </div>
+          <button class="btn-white" onclick="publishSite()">Publicar ✨</button>
+        </div>
+
+        <div class="stats-grid">
+          <div class="stat-card">
+            <div class="stat-label">Dias Juntos <span class="stat-icon">💑</span></div>
+            <div class="stat-value" id="stat-days">—</div>
+            <div class="stat-sub">dias de amor</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Views <span class="stat-icon">👀</span></div>
+            <div class="stat-value" id="stat-views">—</div>
+            <div class="stat-sub">visualizações</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Fotos <span class="stat-icon">📸</span></div>
+            <div class="stat-value" id="stat-photos">—</div>
+            <div class="stat-sub">na galeria</div>
+          </div>
+          <div class="stat-card">
+            <div class="stat-label">Momentos <span class="stat-icon">🌟</span></div>
+            <div class="stat-value" id="stat-milestones">—</div>
+            <div class="stat-sub">datas especiais</div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Link do seu site</div>
+              <div class="section-sub">Compartilhe com quem você ama</div>
+            </div>
+            <div style="display:flex;gap:8px">
+              <button class="btn btn-ghost" style="padding:8px 14px;font-size:12px" onclick="showPanel('qrcode')">📲 QR</button>
+              <button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="copyLink()">📋 Copiar</button>
+            </div>
+          </div>
+          <div class="url-preview">🌐 <strong id="site-link">—</strong></div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-title" style="margin-bottom:12px">⏳ Para o Dia dos Namorados</div>
+          <div class="cd-display" id="countdown-admin">Calculando...</div>
+        </div>
+      </div>
+
+      <!-- CONTENT -->
+      <div id="panel-content" class="panel">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Informações do Casal</div></div>
+          <div class="form-row">
+            <div class="form-group">
+              <label>Nomes do casal</label>
+              <input type="text" id="coupleNames" placeholder="Ex: Ana & João">
+            </div>
+            <div class="form-group">
+              <label>Data de início</label>
+              <input type="date" id="startDate">
+            </div>
+          </div>
+          <div class="form-group">
+            <label>Subtítulo do site</label>
+            <input type="text" id="heroSubtitle" placeholder="Uma frase especial sobre vocês">
+          </div>
+          <div class="form-group">
+            <label>História do casal</label>
+            <textarea id="story" rows="5" placeholder="Conte como foi o começo..."></textarea>
+          </div>
+          <div class="form-group">
+            <label>Mensagem especial (final do site)</label>
+            <textarea id="message" rows="4" placeholder="Uma mensagem do coração..."></textarea>
+          </div>
+        </div>
+      </div>
+
+      <!-- PHOTOS -->
+      <div id="panel-photos" class="panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Foto de Perfil</div>
+              <div class="section-sub">Aparece no topo do site</div>
+            </div>
+          </div>
+          <div class="profile-upload-zone" onclick="document.getElementById('profile-input').click()">
+            <img id="profile-preview-img" class="profile-preview" src="" alt="Perfil" style="display:none">
+            <div class="profile-placeholder" id="profile-placeholder">💕</div>
+            <div style="text-align:center">
+              <div style="font-weight:600;font-size:14px;color:var(--text)">Trocar foto de perfil</div>
+              <div style="font-size:12px;color:var(--muted);margin-top:4px">Toque para escolher da galeria</div>
+            </div>
+          </div>
+          <input type="file" id="profile-input" accept="image/*" style="display:none" onchange="uploadProfilePhoto(this)">
+          <div id="profile-progress" style="display:none;margin-top:10px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Enviando...</div>
+            <div class="progress-bar"><div class="progress-fill" id="profile-pfill" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Galeria de Fotos</div>
+              <div class="section-sub">Toque + para adicionar da galeria</div>
+            </div>
+          </div>
+          <div class="photos-grid" id="photos-grid"></div>
+          <input type="file" id="gallery-input" accept="image/*" multiple style="display:none" onchange="uploadGalleryPhotos(this)">
+          <div id="gallery-progress" style="display:none;margin-top:12px">
+            <div style="font-size:12px;color:var(--muted);margin-bottom:6px">Enviando fotos... <span id="gallery-progress-text"></span></div>
+            <div class="progress-bar"><div class="progress-fill" id="gallery-pfill" style="width:0%"></div></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header"><div><div class="section-title">Adicionar por URL</div><div class="section-sub">Opcional — cole link direto de imagem</div></div></div>
+          <div class="form-group">
+            <label>URL da foto</label>
+            <input type="url" id="new-photo-url" placeholder="https://...">
+          </div>
+          <div class="form-group">
+            <label>Legenda</label>
+            <input type="text" id="new-photo-caption" placeholder="Um momento especial...">
+          </div>
+          <button class="btn btn-ghost" style="font-size:13px" onclick="addPhotoByUrl()">+ Adicionar por URL</button>
+        </div>
+      </div>
+
+      <!-- MILESTONES — NOVO com foto -->
+      <div id="panel-milestones" class="panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Momentos Especiais</div>
+              <div class="section-sub">Cada card pode ter uma foto própria na linha do tempo</div>
+            </div>
+            <button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="addMilestone()">+ Novo</button>
+          </div>
+          <div id="milestones-list"></div>
+          <div class="hint-box">
+            <div class="hint-title">📷 Como adicionar foto a um momento</div>
+            <ul>
+              <li>Clique no ícone de câmera em cada momento para enviar uma foto</li>
+              <li>Ou cole diretamente a URL de uma imagem</li>
+              <li>A foto aparece como polaroid ao lado do momento na linha do tempo</li>
+            </ul>
+          </div>
+        </div>
+        <!-- inputs de arquivo ocultos por milestone (criados dinamicamente) -->
+        <div id="milestone-file-inputs"></div>
+      </div>
+
+      <!-- PLAYLIST -->
+      <div id="panel-playlist" class="panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Playlist do Casal</div>
+              <div class="section-sub">Músicas com player de YouTube embutido</div>
+            </div>
+          </div>
+          <div class="toggle-row" style="margin-bottom:16px">
+            <div class="toggle-info">
+              <h4>🎵 Ativar playlist no site</h4>
+              <p>Exibe player com músicas do casal</p>
+            </div>
+            <label class="toggle"><input type="checkbox" id="musicEnabled"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="playlist-items"></div>
+          <button class="btn btn-ghost" style="margin-top:8px;font-size:13px;width:100%" onclick="addPlaylistItem()">+ Adicionar música</button>
+          <div class="hint-box">
+            <div class="hint-title">📖 Como adicionar músicas</div>
+            <ol>
+              <li>Preencha o <b>nome da música</b> e o <b>artista</b></li>
+              <li>Abra o <a href="https://youtube.com" target="_blank">YouTube</a> e pesquise a música</li>
+              <li>Copie o <b>link completo</b> — ex: <code>youtube.com/watch?v=2Vv-BfVoq4g</code></li>
+              <li>Cole no campo de link — o ID é extraído automaticamente ✅</li>
+            </ol>
+          </div>
+        </div>
+      </div>
+
+      <!-- QUIZ -->
+      <div id="panel-quiz" class="panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">Quiz do Relacionamento</div>
+              <div class="section-sub">Perguntas sobre vocês para a pessoa responder</div>
+            </div>
+            <button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="addQuizQuestion()">+ Pergunta</button>
+          </div>
+          <div class="toggle-row" style="margin-bottom:16px">
+            <div class="toggle-info">
+              <h4>🎯 Ativar quiz no site</h4>
+              <p>Exibe jogo de perguntas no site</p>
+            </div>
+            <label class="toggle"><input type="checkbox" id="quizEnabled"><span class="toggle-slider"></span></label>
+          </div>
+          <div id="quiz-editor"></div>
+          <div style="margin-top:14px;padding:12px;background:rgba(233,30,140,.05);border-radius:10px;font-size:12px;color:var(--muted)">
+            💡 Clique no círculo ao lado de uma opção para marcá-la como <b>resposta correta</b>
+          </div>
+        </div>
+      </div>
+
+      <!-- DESIGN -->
+      <div id="panel-design" class="panel">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Cores do Site</div></div>
+          <div class="color-row">
+            <div class="color-item">
+              <label>Principal</label>
+              <input type="color" id="primaryColor" value="#e91e8c" onchange="updateLiveColors()">
+            </div>
+            <div class="color-item">
+              <label>Secundária</label>
+              <input type="color" id="secondaryColor" value="#f06292" onchange="updateLiveColors()">
+            </div>
+            <div class="color-item">
+              <label>Destaque</label>
+              <input type="color" id="accentColor" value="#ff4081" onchange="updateLiveColors()">
+            </div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Efeito de Fundo</div></div>
+          <div class="effects-grid">
+            <div class="effect-card selected" id="eff-petals" onclick="selectEffect('petals')"><span class="eff-icon">🌸</span><span>Pétalas</span></div>
+            <div class="effect-card" id="eff-stars" onclick="selectEffect('stars')"><span class="eff-icon">⭐</span><span>Estrelas</span></div>
+            <div class="effect-card" id="eff-hearts" onclick="selectEffect('hearts')"><span class="eff-icon">💕</span><span>Corações</span></div>
+            <div class="effect-card" id="eff-none" onclick="selectEffect('none')"><span class="eff-icon">✕</span><span>Nenhum</span></div>
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header"><div><div class="section-title">Contagem Regressiva</div></div></div>
+          <div class="toggle-row">
+            <div class="toggle-info">
+              <h4>⏳ Mostrar contagem regressiva</h4>
+              <p>Exibe countdown para uma data especial</p>
+            </div>
+            <label class="toggle"><input type="checkbox" id="showCountdown"><span class="toggle-slider"></span></label>
+          </div>
+          <div class="form-group" style="margin-top:12px">
+            <label>Data do evento</label>
+            <input type="date" id="countdownDate">
+          </div>
+        </div>
+
+        <div class="section-card">
+          <div class="section-header"><div><div class="section-title">URL do Site</div></div></div>
+          <div class="form-group">
+            <label>Endereço personalizado</label>
+            <input type="text" id="siteUrl" placeholder="ana-e-joao" oninput="updateUrlPreview()">
+          </div>
+          <div class="url-preview">🌐 <strong id="url-origin">...</strong>/site/<span id="url-preview-slug">—</span></div>
+        </div>
+      </div>
+
+      <!-- QR CODE -->
+      <div id="panel-qrcode" class="panel">
+        <div class="section-card">
+          <div class="section-header">
+            <div>
+              <div class="section-title">QR Code do Site</div>
+              <div class="section-sub">Compartilhe com um escaneio do celular</div>
+            </div>
+            <button class="btn btn-primary" style="padding:8px 14px;font-size:12px" onclick="generateQR()">🔄 Gerar</button>
+          </div>
+          <div class="qr-wrapper">
+            <div class="qr-canvas-wrap">
+              <div id="qr-container">
+                <div id="qr-placeholder">
+                  <div style="font-size:36px">📲</div>
+                  <div>Clique em "Gerar" para criar o QR Code</div>
+                </div>
+              </div>
+            </div>
+            <div class="qr-url-display" id="qr-url-display">—</div>
+            <div class="qr-actions">
+              <button class="btn btn-primary" onclick="downloadQR()">⬇️ Baixar PNG</button>
+              <button class="btn btn-ghost" onclick="copyLink()">📋 Copiar link</button>
+              <button class="btn btn-ghost" onclick="shareQR()">🔗 Compartilhar</button>
+            </div>
+          </div>
+          <div style="margin-top:16px;padding:12px;background:rgba(233,30,140,.05);border-radius:10px;font-size:12px;color:var(--muted)">
+            💡 Imprima o QR Code e cole em um cartão ou moldura para surpreender quem você ama!
+          </div>
+        </div>
+      </div>
+
+      <!-- PREVIEW -->
+      <div id="panel-preview" class="panel">
+        <div class="preview-wrap">
+          <div class="preview-bar">
+            <div class="preview-dot" style="background:#ff5f57"></div>
+            <div class="preview-dot" style="background:#febc2e"></div>
+            <div class="preview-dot" style="background:#28c840"></div>
+            <input class="preview-url" id="preview-url-bar" readonly>
+            <button class="btn btn-primary" style="padding:6px 12px;font-size:12px" onclick="refreshPreview()">↻</button>
+          </div>
+          <iframe id="preview-frame" src="about:blank"></iframe>
+        </div>
+      </div>
+
+      <!-- SETTINGS -->
+      <div id="panel-settings" class="panel">
+        <div class="section-card">
+          <div class="section-header"><div class="section-title">Conta</div></div>
+          <div id="account-info" style="font-size:14px;color:var(--muted);line-height:2"></div>
+          <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap">
+            <button class="btn btn-ghost" onclick="logout()">🚪 Fazer logout</button>
+          </div>
+        </div>
+      </div>
+
+    </main>
+  </div>
+</div>
+
+<button class="mobile-save" onclick="saveConfig()" title="Salvar">💾</button>
+
+<nav class="mobile-nav" id="mobile-nav">
+  <div class="mobile-nav-item active" onclick="showPanel('dashboard')"><span class="mni">📊</span>Home</div>
+  <div class="mobile-nav-item" onclick="showPanel('content')"><span class="mni">✏️</span>Texto</div>
+  <div class="mobile-nav-item" onclick="showPanel('photos')"><span class="mni">📸</span>Fotos</div>
+  <div class="mobile-nav-item" onclick="showPanel('design')"><span class="mni">🎨</span>Design</div>
+  <div class="mobile-nav-item" id="more-btn" onclick="toggleMoreMenu()"><span class="mni">⋯</span>Mais</div>
+</nav>
+
+<div class="mobile-nav-more" id="more-menu">
+  <div class="more-item" onclick="showPanel('milestones');closeMoreMenu()"><span>🌟</span>Momentos</div>
+  <div class="more-item" onclick="showPanel('playlist');closeMoreMenu()"><span>🎵</span>Playlist</div>
+  <div class="more-item" onclick="showPanel('quiz');closeMoreMenu()"><span>🎯</span>Quiz</div>
+  <div class="more-item" onclick="showPanel('qrcode');closeMoreMenu()"><span>📲</span>QR Code</div>
+  <div class="more-item" onclick="showPanel('preview');closeMoreMenu()"><span>👁️</span>Visualizar</div>
+  <div class="more-item" onclick="showPanel('settings');closeMoreMenu()"><span>⚙️</span>Config</div>
+</div>
+
+<div id="toast">✅ Salvo!</div>
+
+<script>
+const API = '';
+let config = {};
+let token = localStorage.getItem('token');
+let user = JSON.parse(localStorage.getItem('user') || '{}');
+let selectedEffect = 'petals';
+let qrInstance = null;
+
+if (!token) window.location.href = '/login';
+
+// ── PANELS ────────────────────────────────────────────────────────────────────
+const panelMeta = {
+  dashboard:'Dashboard', content:'Textos', photos:'Fotos & Perfil',
+  milestones:'Momentos', playlist:'Playlist', quiz:'Quiz',
+  design:'Design', preview:'Visualizar', settings:'Config', qrcode:'QR Code'
+};
+
+function showPanel(name) {
+  document.querySelectorAll('.panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.nav-item').forEach(n => n.classList.remove('active'));
+  document.querySelectorAll('.mobile-nav-item').forEach(n => n.classList.remove('active'));
+
+  const panel = document.getElementById('panel-' + name);
+  if (panel) panel.classList.add('active');
+
+  const title = panelMeta[name] || name;
+  document.getElementById('topbar-title').textContent = title;
+  const dtitle = document.getElementById('panel-title-desktop');
+  if (dtitle) dtitle.textContent = title;
+
+  document.querySelectorAll('.nav-item').forEach(item => {
+    if (item.getAttribute('onclick')?.includes(`'${name}'`)) item.classList.add('active');
+  });
+  document.querySelectorAll('.mobile-nav-item').forEach(item => {
+    if (item.getAttribute('onclick')?.includes(`'${name}'`)) item.classList.add('active');
+  });
+
+  if (name === 'preview') loadPreview();
+  if (name === 'qrcode') generateQR();
+  closeMobileSidebar();
+}
+
+function toggleMobileSidebar() {
+  document.getElementById('sidebar').style.display = 'flex';
+  document.getElementById('sidebar-overlay').classList.add('open');
+}
+function closeMobileSidebar() {
+  if (window.innerWidth < 768) {
+    document.getElementById('sidebar').style.display = '';
+    document.getElementById('sidebar-overlay').classList.remove('open');
+  }
+}
+function toggleMoreMenu() {
+  const m = document.getElementById('more-menu');
+  m.classList.toggle('open');
+  document.getElementById('more-btn').classList.toggle('active');
+}
+function closeMoreMenu() {
+  document.getElementById('more-menu').classList.remove('open');
+  document.getElementById('more-btn').classList.remove('active');
+}
+
+// ── API ───────────────────────────────────────────────────────────────────────
+const headers = () => ({ 'Content-Type': 'application/json', 'Authorization': `Bearer ${token}` });
+
+async function loadConfig() {
+  try {
+    const res = await fetch(`${API}/api/site/config`, { headers: headers() });
+    if (res.status === 401) { logout(); return; }
+    config = await res.json();
+    fillForm();
+    loadStats();
+  } catch(e) { console.error(e); }
+}
+
+async function loadStats() {
+  try {
+    const res = await fetch(`${API}/api/stats`, { headers: headers() });
+    const stats = await res.json();
+    document.getElementById('stat-days').textContent = (stats.daysTogetherr || 0).toLocaleString('pt-BR');
+    document.getElementById('stat-views').textContent = stats.siteViews || 0;
+    document.getElementById('stat-photos').textContent = stats.photosCount || 0;
+    document.getElementById('stat-milestones').textContent = stats.milestonesCount || 0;
+    const online = config.published;
+    document.getElementById('status-dot').className = 'status-dot' + (online ? ' online' : '');
+    document.getElementById('status-label').textContent = online ? 'Publicado' : 'Rascunho';
+  } catch(e) {}
+}
+
+async function saveConfig() {
+  collectForm();
+  const btn = document.getElementById('save-btn');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳...'; }
+  try {
+    await fetch(`${API}/api/site/config`, {
+      method: 'PUT', headers: headers(), body: JSON.stringify(config)
+    });
+    showToast('💕 Salvo!');
+  } catch(e) { showToast('❌ Erro ao salvar'); }
+  finally { if (btn) { btn.disabled = false; btn.textContent = '💾 Salvar'; } }
+}
+
+async function publishSite() {
+  await saveConfig();
+  try {
+    await fetch(`${API}/api/site/publish`, { method: 'POST', headers: headers() });
+    config.published = true;
+    document.getElementById('status-dot').className = 'status-dot online';
+    document.getElementById('status-label').textContent = 'Publicado';
+    document.getElementById('publish-banner').style.background = 'linear-gradient(135deg,rgba(34,197,94,.2),rgba(21,128,61,.12))';
+    document.getElementById('publish-banner').style.borderColor = 'rgba(34,197,94,.3)';
+    document.getElementById('site-status-text').textContent = '🎉 Site publicado! Compartilhe o link';
+    showToast('🎉 Publicado!');
+  } catch(e) { showToast('❌ Erro ao publicar'); }
+}
+
+function logout() {
+  fetch(`${API}/api/auth/logout`, { method: 'POST', headers: headers() });
+  localStorage.clear();
+  window.location.href = '/login';
+}
+
+// ── FORM ──────────────────────────────────────────────────────────────────────
+function fillForm() {
+  const c = config;
+  const fields = ['coupleNames','startDate','heroSubtitle','story','message',
+    'primaryColor','secondaryColor','accentColor','siteUrl','countdownDate'];
+  fields.forEach(f => {
+    const el = document.getElementById(f);
+    if (el && c[f] !== undefined) el.value = c[f];
+  });
+  ['showCountdown','musicEnabled','quizEnabled'].forEach(f => {
+    const el = document.getElementById(f);
+    if (el) el.checked = !!c[f];
+  });
+  if (c.profilePhoto) {
+    document.getElementById('profile-preview-img').src = c.profilePhoto;
+    document.getElementById('profile-preview-img').style.display = 'block';
+    document.getElementById('profile-placeholder').style.display = 'none';
+  }
+  selectEffect(c.backgroundEffect || 'petals', false);
+  renderPhotos(); renderMilestones(); renderPlaylist(); renderQuizEditor();
+  updateUrlPreview();
+
+  document.getElementById('user-name-sidebar').textContent = user.name || c.coupleNames || '—';
+  document.getElementById('user-plan-sidebar').textContent = user.plan === 'premium' ? '⭐ Premium' : '🆓 Grátis';
+  document.getElementById('user-avatar').textContent = (user.name || 'A').charAt(0).toUpperCase();
+
+  const link = `${window.location.origin}/site/${c.siteUrl}`;
+  document.getElementById('site-link').textContent = link;
+  document.getElementById('account-info').innerHTML = `
+    <b>Nome:</b> ${user.name||'—'}<br><b>Email:</b> ${user.email||'—'}<br>
+    <b>Plano:</b> ${user.plan==='premium'?'⭐ Premium':'🆓 Grátis'}<br><b>Site:</b> ${link}
+  `;
+  updateCountdown();
+  setInterval(updateCountdown, 30000);
+}
+
+function collectForm() {
+  const fields = ['coupleNames','startDate','heroSubtitle','story','message',
+    'primaryColor','secondaryColor','accentColor','siteUrl','countdownDate'];
+  fields.forEach(f => { const el = document.getElementById(f); if (el) config[f] = el.value; });
+  ['showCountdown','musicEnabled','quizEnabled'].forEach(f => {
+    const el = document.getElementById(f); if (el) config[f] = el.checked;
+  });
+  config.backgroundEffect = selectedEffect;
+}
+
+// ── PROFILE PHOTO ─────────────────────────────────────────────────────────────
+async function uploadProfilePhoto(input) {
+  const file = input.files[0]; if (!file) return;
+  const prog = document.getElementById('profile-progress');
+  const pfill = document.getElementById('profile-pfill');
+  prog.style.display = 'block';
+  const formData = new FormData(); formData.append('image', file);
+  let p = 0; const interval = setInterval(() => { p = Math.min(p + 10, 85); pfill.style.width = p + '%'; }, 150);
+  try {
+    const res = await fetch(`${API}/api/upload/profile`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData
+    });
+    clearInterval(interval);
+    if (!res.ok) throw new Error();
+    const data = await res.json();
+    pfill.style.width = '100%';
+    config.profilePhoto = data.url;
+    document.getElementById('profile-preview-img').src = data.url;
+    document.getElementById('profile-preview-img').style.display = 'block';
+    document.getElementById('profile-placeholder').style.display = 'none';
+    showToast('📸 Foto de perfil atualizada!');
+  } catch(e) { clearInterval(interval); await uploadAsBase64Profile(file); }
+  finally { setTimeout(() => { prog.style.display = 'none'; pfill.style.width = '0%'; }, 800); }
+}
+
+async function uploadAsBase64Profile(file) {
+  const reader = new FileReader();
+  reader.onload = (e) => {
+    config.profilePhoto = e.target.result;
+    document.getElementById('profile-preview-img').src = e.target.result;
+    document.getElementById('profile-preview-img').style.display = 'block';
+    document.getElementById('profile-placeholder').style.display = 'none';
+    showToast('📸 Foto carregada!');
+  };
+  reader.readAsDataURL(file);
+}
+
+// ── GALLERY ───────────────────────────────────────────────────────────────────
+async function uploadGalleryPhotos(input) {
+  const files = Array.from(input.files); if (!files.length) return;
+  const prog = document.getElementById('gallery-progress');
+  const pfill = document.getElementById('gallery-pfill');
+  const ptxt = document.getElementById('gallery-progress-text');
+  prog.style.display = 'block';
+  for (let i = 0; i < files.length; i++) {
+    const file = files[i]; ptxt.textContent = `${i+1}/${files.length}`;
+    pfill.style.width = ((i / files.length) * 100) + '%';
+    try {
+      const formData = new FormData(); formData.append('image', file);
+      const res = await fetch(`${API}/api/upload`, {
+        method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData
+      });
+      if (res.ok) { const data = await res.json(); if (!config.photos) config.photos = []; config.photos.push({ id: Date.now() + i, url: data.url, caption: '', type: 'gallery' }); } else throw new Error();
+    } catch(e) {
+      await new Promise(resolve => {
+        const reader = new FileReader();
+        reader.onload = (ev) => { if (!config.photos) config.photos = []; config.photos.push({ id: Date.now() + i, url: ev.target.result, caption: '', type: 'gallery' }); resolve(); };
+        reader.readAsDataURL(file);
+      });
+    }
+  }
+  pfill.style.width = '100%'; renderPhotos(); updatePhotoStats();
+  showToast(`📸 ${files.length} foto${files.length > 1 ? 's' : ''} adicionada${files.length > 1 ? 's' : ''}!`);
+  setTimeout(() => { prog.style.display = 'none'; pfill.style.width = '0%'; }, 800);
+  input.value = '';
+}
+
+function addPhotoByUrl() {
+  const url = document.getElementById('new-photo-url').value.trim();
+  const caption = document.getElementById('new-photo-caption').value.trim();
+  if (!url) return;
+  if (!config.photos) config.photos = [];
+  config.photos.push({ id: Date.now(), url, caption: caption || '', type: 'gallery' });
+  document.getElementById('new-photo-url').value = ''; document.getElementById('new-photo-caption').value = '';
+  renderPhotos(); updatePhotoStats(); showToast('🔗 Foto adicionada!');
+}
+
+function renderPhotos() {
+  const grid = document.getElementById('photos-grid');
+  const photos = config.photos || [];
+  grid.innerHTML = photos.map((p, i) => `
+    <div class="photo-item">
+      <img src="${p.url}" alt="" loading="lazy" onerror="this.parentElement.style.opacity='.4'">
+      <button class="photo-remove" onclick="removePhoto(${i})">✕</button>
+    </div>
+  `).join('') + `<div class="photo-add" onclick="document.getElementById('gallery-input').click()"><div class="photo-add-icon">📷</div><div>Da galeria</div></div>`;
+}
+
+function removePhoto(i) { config.photos.splice(i, 1); renderPhotos(); updatePhotoStats(); }
+function updatePhotoStats() { const el = document.getElementById('stat-photos'); if (el) el.textContent = (config.photos || []).length; }
+
+// ── MILESTONES com foto ───────────────────────────────────────────────────────
+const EMOJIS = ['💘','💋','🕯️','🏖️','💍','🎂','✈️','🌹','💒','🎉','🏠','🐾','👶','🎓','💼','🌙','☀️','🌈'];
+
+function renderMilestones() {
+  const list = document.getElementById('milestones-list');
+  const ms = config.milestones || [];
+  list.innerHTML = ms.map((m, i) => {
+    const hasPhoto = !!m.photoUrl;
+    const thumbHtml = hasPhoto
+      ? `<img class="milestone-thumb" src="${escHtml(m.photoUrl)}" alt="foto" onclick="triggerMilestonePhoto(${i})" onerror="this.style.display='none'">`
+      : `<div class="milestone-no-photo" onclick="triggerMilestonePhoto(${i})" title="Adicionar foto">📷</div>`;
+
+    return `
+    <div class="milestone-item" id="ms-item-${i}">
+      <div class="milestone-header">
+        <div class="milestone-emoji" onclick="cycleEmoji(${i})" title="Clique para mudar">${m.icon || '💫'}</div>
+        <div class="milestone-fields">
+          <input value="${escHtml(m.title||'')}" onchange="config.milestones[${i}].title=this.value" placeholder="Título do momento">
+          <input type="date" value="${m.date||''}" onchange="config.milestones[${i}].date=this.value">
+          <input value="${escHtml(m.description||'')}" onchange="config.milestones[${i}].description=this.value" placeholder="Descrição...">
+        </div>
+        <button class="icon-btn" onclick="removeMilestone(${i})">🗑️</button>
+      </div>
+      <div class="milestone-photo-section">
+        <div class="milestone-photo-label">📷 Foto do momento</div>
+        <div class="milestone-photo-row">
+          ${thumbHtml}
+          <div class="milestone-photo-actions">
+            <button class="milestone-photo-btn" onclick="triggerMilestonePhoto(${i})">
+              ${hasPhoto ? '🔄 Trocar foto' : '📁 Enviar foto'}
+            </button>
+            ${hasPhoto ? `<button class="milestone-photo-btn" onclick="removeMilestonePhoto(${i})" style="color:#ef4444;border-color:#ef4444">✕ Remover</button>` : ''}
+          </div>
+          <input
+            class="milestone-photo-caption-input"
+            value="${escHtml(m.photoCaption||'')}"
+            onchange="config.milestones[${i}].photoCaption=this.value"
+            placeholder="Legenda da foto (opcional)"
+          >
+        </div>
+        <div class="milestone-url-row">
+          <input 
+            id="ms-url-${i}"
+            placeholder="Ou cole URL de imagem aqui..."
+            value="${hasPhoto && m.photoUrl.startsWith('http') ? escHtml(m.photoUrl) : ''}"
+            oninput="handleMilestoneUrlInput(${i}, this.value)"
+          >
+          <button onclick="applyMilestoneUrl(${i})">Aplicar</button>
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+
+  // Cria inputs de arquivo ocultos
+  const container = document.getElementById('milestone-file-inputs');
+  container.innerHTML = ms.map((m, i) =>
+    `<input type="file" id="ms-file-${i}" accept="image/*" style="display:none" onchange="uploadMilestonePhoto(${i}, this)">`
+  ).join('');
+}
+
+function escHtml(str) {
+  if (!str) return '';
+  return String(str).replace(/&/g,'&amp;').replace(/"/g,'&quot;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function triggerMilestonePhoto(i) {
+  document.getElementById(`ms-file-${i}`)?.click();
+}
+
+function handleMilestoneUrlInput(i, val) {
+  // só aplica quando pressionar o botão — não onchange direto
+}
+
+function applyMilestoneUrl(i) {
+  const val = document.getElementById(`ms-url-${i}`)?.value?.trim();
+  if (!val) return;
+  config.milestones[i].photoUrl = val;
+  renderMilestones();
+  showToast('🖼️ URL aplicada!');
+}
+
+function removeMilestonePhoto(i) {
+  config.milestones[i].photoUrl = '';
+  config.milestones[i].photoCaption = '';
+  renderMilestones();
+  showToast('🗑️ Foto removida');
+}
+
+async function uploadMilestonePhoto(i, input) {
+  const file = input.files[0]; if (!file) return;
+  try {
+    const formData = new FormData(); formData.append('image', file);
+    const res = await fetch(`${API}/api/upload`, {
+      method: 'POST', headers: { 'Authorization': `Bearer ${token}` }, body: formData
+    });
+    if (res.ok) {
+      const data = await res.json();
+      config.milestones[i].photoUrl = data.url;
+    } else throw new Error();
+  } catch(e) {
+    // fallback base64
+    await new Promise(resolve => {
+      const reader = new FileReader();
+      reader.onload = (ev) => { config.milestones[i].photoUrl = ev.target.result; resolve(); };
+      reader.readAsDataURL(file);
+    });
+  }
+  input.value = '';
+  renderMilestones();
+  showToast('📸 Foto do momento adicionada!');
+}
+
+function cycleEmoji(i) { const m = config.milestones[i]; const idx = EMOJIS.indexOf(m.icon); m.icon = EMOJIS[(idx + 1) % EMOJIS.length]; renderMilestones(); }
+
+function addMilestone() {
+  if (!config.milestones) config.milestones = [];
+  config.milestones.push({ id: Date.now(), date: new Date().toISOString().split('T')[0], title: 'Novo momento', description: '', icon: '💫', photoUrl: '', photoCaption: '' });
+  renderMilestones();
+  showToast('🌟 Momento adicionado!');
+}
+
+function removeMilestone(i) { config.milestones.splice(i, 1); renderMilestones(); }
+
+// ── PLAYLIST ──────────────────────────────────────────────────────────────────
+function extractYoutubeId(input) {
+  if (!input) return '';
+  input = input.trim();
+  if (!input.includes('http') && !input.includes('.') && input.length <= 15) return input;
+  try {
+    const url = new URL(input);
+    if (url.hostname.includes('youtu.be')) return url.pathname.slice(1);
+    return url.searchParams.get('v') || '';
+  } catch(e) { return input.length <= 15 ? input : ''; }
+}
+
+function renderPlaylist() {
+  const el = document.getElementById('playlist-items');
+  const pl = config.playlist || [];
+  if (!pl.length) { el.innerHTML = ''; return; }
+  el.innerHTML = pl.map((s, i) => {
+    const ytId = s.youtubeId || '';
+    const hasId = ytId.length > 0;
+    return `
+    <div class="playlist-item" id="pli-${i}">
+      <div class="playlist-item-header">
+        <span class="playlist-drag">⠿</span>
+        <div class="playlist-num">${i + 1}</div>
+        <div class="playlist-fields">
+          <input value="${escHtml(s.title||'')}" onchange="config.playlist[${i}].title=this.value" placeholder="Nome da música">
+          <input value="${escHtml(s.artist||'')}" onchange="config.playlist[${i}].artist=this.value" placeholder="Artista">
+        </div>
+        <button class="icon-btn" onclick="removePlaylistItem(${i})" style="margin-left:4px">✕</button>
+      </div>
+      <div class="yt-link-section">
+        <div class="yt-link-label">
+          🎬 <strong>Link do YouTube</strong>
+          ${hasId ? `<span style="color:#22c55e;font-size:11px">✓ ID: ${ytId}</span>` : '<span style="color:var(--muted)">não configurado</span>'}
+        </div>
+        <div class="yt-input-row">
+          <input id="yt-input-${i}" class="${hasId ? 'has-value' : ''}"
+            value="${hasId ? 'https://youtube.com/watch?v=' + ytId : ''}"
+            placeholder="Cole o link do YouTube aqui..."
+            oninput="handleYtInput(${i}, this)">
+          <button class="yt-preview-btn" onclick="previewYt(${i})" ${!hasId ? 'disabled' : ''} id="yt-preview-btn-${i}">▶ Ver</button>
+        </div>
+        <div class="yt-status ${hasId ? 'ok' : 'empty'}" id="yt-status-${i}">
+          ${hasId ? '✓ Música configurada — pronto para tocar' : 'Cole o link do YouTube acima'}
+        </div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function handleYtInput(i, input) {
+  const raw = input.value.trim();
+  const id = extractYoutubeId(raw);
+  const statusEl = document.getElementById(`yt-status-${i}`);
+  const previewBtn = document.getElementById(`yt-preview-btn-${i}`);
+  if (id) {
+    config.playlist[i].youtubeId = id; input.classList.add('has-value');
+    statusEl.className = 'yt-status ok'; statusEl.textContent = `✓ ID extraído: ${id}`;
+    if (previewBtn) previewBtn.disabled = false;
+  } else if (raw) {
+    config.playlist[i].youtubeId = ''; input.classList.remove('has-value');
+    statusEl.className = 'yt-status err'; statusEl.textContent = '⚠ Link inválido — cole o link completo do YouTube';
+    if (previewBtn) previewBtn.disabled = true;
+  } else {
+    config.playlist[i].youtubeId = ''; input.classList.remove('has-value');
+    statusEl.className = 'yt-status empty'; statusEl.textContent = 'Cole o link do YouTube acima';
+    if (previewBtn) previewBtn.disabled = true;
+  }
+}
+function previewYt(i) { const id = config.playlist[i]?.youtubeId; if (id) window.open(`https://youtube.com/watch?v=${id}`, '_blank'); }
+function addPlaylistItem() {
+  if (!config.playlist) config.playlist = [];
+  config.playlist.push({ id: Date.now(), title: '', artist: '', youtubeId: '' });
+  renderPlaylist();
+  setTimeout(() => { document.getElementById('playlist-items').lastElementChild?.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); }, 100);
+}
+function removePlaylistItem(i) { config.playlist.splice(i, 1); renderPlaylist(); }
+
+// ── QUIZ ──────────────────────────────────────────────────────────────────────
+function renderQuizEditor() {
+  const editor = document.getElementById('quiz-editor');
+  const qs = config.quizQuestions || [];
+  editor.innerHTML = qs.map((q, qi) => `
+    <div class="quiz-question-item">
+      <div class="quiz-q-header">
+        <div class="quiz-q-num">${qi+1}</div>
+        <input class="quiz-q-input" value="${escHtml(q.question||'')}" onchange="config.quizQuestions[${qi}].question=this.value" placeholder="Escreva a pergunta...">
+        <button class="icon-btn" onclick="removeQuestion(${qi})">🗑️</button>
+      </div>
+      <div class="quiz-options-grid">
+        ${(q.options || ['','','','']).map((opt, oi) => `
+          <div class="quiz-option-item ${oi === q.correct ? 'correct' : ''}">
+            <button class="quiz-option-btn ${oi === q.correct ? 'selected' : ''}" onclick="setCorrect(${qi},${oi})"></button>
+            <input value="${escHtml(opt||'')}" placeholder="Opção ${oi+1}" onchange="config.quizQuestions[${qi}].options[${oi}]=this.value">
+            ${oi === q.correct ? '<span class="quiz-correct-badge">✓</span>' : ''}
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `).join('');
+}
+function setCorrect(qi, oi) { if (config.quizQuestions[qi]) { config.quizQuestions[qi].correct = oi; renderQuizEditor(); } }
+function addQuizQuestion() {
+  if (!config.quizQuestions) config.quizQuestions = [];
+  config.quizQuestions.push({ id: Date.now(), question: '', options: ['','','',''], correct: 0 });
+  renderQuizEditor();
+}
+function removeQuestion(qi) { config.quizQuestions.splice(qi, 1); renderQuizEditor(); }
+
+// ── EFFECTS ───────────────────────────────────────────────────────────────────
+function selectEffect(name, updateConfig = true) {
+  selectedEffect = name;
+  ['petals','stars','hearts','none'].forEach(e => {
+    const el = document.getElementById('eff-' + e);
+    if (el) el.classList.toggle('selected', e === name);
+  });
+  if (updateConfig) config.backgroundEffect = name;
+}
+function updateLiveColors() {
+  const p = document.getElementById('primaryColor')?.value;
+  const s = document.getElementById('secondaryColor')?.value;
+  if (p) document.documentElement.style.setProperty('--rose', p);
+  if (s) document.documentElement.style.setProperty('--rose-light', s);
+}
+
+// ── QR CODE ───────────────────────────────────────────────────────────────────
+function getSiteUrl() { return `${window.location.origin}/site/${config.siteUrl || ''}`; }
+
+function generateQR() {
+  const url = getSiteUrl();
+  const container = document.getElementById('qr-container');
+  const urlDisplay = document.getElementById('qr-url-display');
+  if (urlDisplay) urlDisplay.textContent = url;
+  container.innerHTML = '';
+  if (!config.siteUrl) {
+    container.innerHTML = '<div id="qr-placeholder" style="width:200px;height:200px;display:flex;flex-direction:column;align-items:center;justify-content:center;gap:10px;font-size:12px;text-align:center"><div style="font-size:36px">⚠️</div><div>Configure a URL do site primeiro</div></div>';
+    return;
+  }
+  try {
+    qrInstance = new QRCode(container, { text: url, width: 200, height: 200, colorDark: '#2d1520', colorLight: '#ffffff', correctLevel: QRCode.CorrectLevel.H });
+    showToast('📲 QR Code gerado!');
+  } catch(e) {
+    container.innerHTML = '<div style="padding:20px;font-size:12px">Erro ao gerar QR Code</div>';
+  }
+}
+
+function downloadQR() {
+  const canvas = document.querySelector('#qr-container canvas');
+  const img = document.querySelector('#qr-container img');
+  if (canvas) { const a = document.createElement('a'); a.download='amoreternо-qrcode.png'; a.href=canvas.toDataURL('image/png'); a.click(); }
+  else if (img) { const a = document.createElement('a'); a.download='amoreternо-qrcode.png'; a.href=img.src; a.click(); }
+  else showToast('⚠️ Gere o QR Code primeiro');
+}
+
+async function shareQR() {
+  const url = getSiteUrl();
+  if (navigator.share) { try { await navigator.share({ title: 'Nosso site de amor 💕', url }); } catch(e) {} }
+  else copyLink();
+}
+
+// ── UTILS ─────────────────────────────────────────────────────────────────────
+function updateUrlPreview() {
+  const slug = document.getElementById('siteUrl')?.value || '';
+  const el = document.getElementById('url-preview-slug');
+  if (el) el.textContent = slug || '—';
+  const link = `${window.location.origin}/site/${slug}`;
+  const siteLink = document.getElementById('site-link');
+  if (siteLink) siteLink.textContent = link;
+  document.getElementById('url-origin').textContent = window.location.origin;
+}
+
+function parseLocalDate(str) { if (!str) return new Date(); return new Date(str + 'T12:00:00'); }
+
+function updateCountdown() {
+  const dateStr = config.countdownDate || document.getElementById('countdownDate')?.value || '2026-06-12';
+  const target = parseLocalDate(dateStr);
+  const diff = target - new Date();
+  const el = document.getElementById('countdown-admin');
+  if (!el) return;
+  if (diff <= 0) { el.innerHTML = '💕 O dia chegou!'; return; }
+  const days = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  el.innerHTML = `<span>${days}</span> dias <span>${h}</span>h <span>${m}</span>min`;
+}
+
+function openSite() { window.open(`/site/${config.siteUrl}`, '_blank'); }
+function copyLink() {
+  const link = getSiteUrl();
+  navigator.clipboard.writeText(link).then(() => showToast('🔗 Link copiado!')).catch(() => {
+    const ta = document.createElement('textarea'); ta.value = link; document.body.appendChild(ta); ta.select(); document.execCommand('copy'); ta.remove();
+    showToast('🔗 Link copiado!');
+  });
+}
+function loadPreview() {
+  const frame = document.getElementById('preview-frame');
+  const bar = document.getElementById('preview-url-bar');
+  const url = `/site/${config.siteUrl}`;
+  if (frame) frame.src = url;
+  if (bar) bar.value = window.location.origin + url;
+}
+function refreshPreview() { loadPreview(); }
+function showToast(msg) {
+  const t = document.getElementById('toast');
+  t.textContent = msg; t.classList.add('show');
+  setTimeout(() => t.classList.remove('show'), 2800);
+}
+
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('url-origin').textContent = window.location.origin;
+loadConfig();
+</script>
+</body>
+</html>
