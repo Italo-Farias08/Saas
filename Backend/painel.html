@@ -159,16 +159,18 @@ el.innerHTML = lista.map(u => {
   }
 
   async function deletar(userId) {
-    if (!confirm('Deletar este site? Isso é irreversível!')) return;
-    const data = await res.json();
-    if (data.success) {
-      todos = todos.filter(u => u.id !== userId);
-      renderizar();
-    } else {
-      alert('Erro ao deletar!');
-    }
+  if (!confirm('Deletar este site? Isso é irreversível!')) return;
+  const res = await fetch(`${API}/api/admin/site/${userId}?secret=${secret}`, {
+    method: 'DELETE'
+  });
+  const data = await res.json();
+  if (data.success) {
+    todos = todos.filter(u => u.id !== userId);
+    renderizar();
+  } else {
+    alert('Erro ao deletar!');
   }
-
+}
   // Atualiza a cada 30 segundos
   setInterval(() => { if (secret) carregarDados(); }, 30000);
 </script>
