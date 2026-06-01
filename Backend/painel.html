@@ -116,26 +116,31 @@
     const el = document.getElementById('lista');
     if (!lista.length) { el.innerHTML = '<div class="empty">Nenhum cadastro encontrado.</div>'; return; }
 
-    el.innerHTML = lista.map(u => `
-      <div class="card" id="card-${u.id}">
-        <div class="card-info">
-          <h3>${u.name}</h3>
-          <p>${u.email}</p>
-          <p style="font-size:11px;color:#b0909f;margin-top:2px;">Cadastrado em: ${new Date(u.created_at).toLocaleString('pt-BR')}</p>
-          <span class="badge ${u.paid ? 'approved' : 'pending'}">${u.paid ? '✅ Aprovado' : '⏳ Pendente'}</span>
-        </div>
-        <div class="actions">
-          ${!u.paid ? `
-            <a class="btn-zap" href="https://wa.me/5581991204180?text=Olá%20${encodeURIComponent(u.name)}!%20Seu%20pagamento%20foi%20confirmado%20e%20seu%20site%20já%20está%20ativo!%20Acesse%3A%20https%3A%2F%2Fgoldlovil.online%2Flogin" target="_blank">💬 Avisar</a>
-            <button class="btn-approve" onclick="aprovar(${u.id})">✅ Aprovar</button>
-          ` : `
-            <a class="btn-zap" href="https://wa.me/5581991204180?text=Olá%20${encodeURIComponent(u.name)}!" target="_blank">💬 Contato</a>
-          `}
-          <button class="btn-delete" onclick="deletar(${u.id})">🗑️ Deletar</button>
-        </div>
+el.innerHTML = lista.map(u => {
+  const nome = encodeURIComponent(u.name);
+  const isPending = !u.paid;
+  return `
+    <div class="card" id="card-${u.id}">
+      <div class="card-info">
+        <h3>${u.name}</h3>
+        <p>${u.email}</p>
+        <p style="font-size:11px;color:#b0909f;margin-top:2px;">Cadastrado em: ${new Date(u.created_at).toLocaleString('pt-BR')}</p>
+        <span class="badge ${u.paid ? 'approved' : 'pending'}">${u.paid ? '✅ Aprovado' : '⏳ Pendente'}</span>
       </div>
-    `).join('');
-  }
+      <div class="actions">
+        ${isPending ? `
+          <a class="btn-zap" href="https://wa.me/5581991204180?text=Ol%C3%A1%20${nome}!%20Seu%20pagamento%20foi%20confirmado!" target="_blank">💬 Avisar</a>
+          <button class="btn-approve" onclick="aprovar(${u.id})">✅ Aprovar</button>
+        ` : `
+          <a class="btn-zap" href="https://wa.me/5581991204180?text=Ol%C3%A1%20${nome}!" target="_blank">💬 Contato</a>
+        `}
+        <button class="btn-delete" onclick="deletar(${u.id})">🗑️ Deletar</button>
+      </div>
+    </div>
+  `;
+}).join('');
+
+}
 
   async function aprovar(userId) {
     if (!confirm('Aprovar pagamento deste usuário?')) return;
