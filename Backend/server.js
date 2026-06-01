@@ -26,6 +26,68 @@ const upload = multer({
     else cb(new Error('Apenas imagens são permitidas'));
   }
 });
+// ─── Pagamento PIX Manual ─────────────────────────────────────────────────────
+
+const PIX_KEY = process.env.PIX_KEY || 'sua-chave-pix-aqui';
+const PIX_NAME = process.env.PIX_NAME || 'Italo Farias';
+const PIX_VALUE = 29.90;
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'senha-secreta-sua';
+
+// Retorna os dados do PIX pro usuário
+app.get('/api/payment/pix-info', authMiddleware, async (req, res) => {
+  try {
+    const userId = req.user.user_id;
+    const result = await query('SELECT paid, payment_status FROM users WHERE id = $1', [userId]);
+    const user = result.rows[0];
+
+    res.json({
+      paid: user.paid,
+      status: user.payment_status,
+      pixKey: PIX_KEY,
+      pixName: PIX_NAME,
+      value: PIX_VALUE,
+      userId: userId
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
+// Você chama essa rota pra aprovar o pagamento de um usuário
+app.post('/api/payment/approve', async (req, res) => {
+  try {
+    const { userId, secret } = req.body;
+
+    if (secret !== ADMIN_SECRET) {
+      return res.status(401).json({ error: 'Não autorizado' });
+    }
+
+    await query(
+      'UPDATE users SET paid = TRUE, payment_status = $1 WHERE id = $2',
+      ['approved', userId]
+    );
+
+    res.json({ success: true, message: `Usuário ${userId} aprovado!` });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
+// Usuário fica verificando se foi aprovado
+app.get('/api/payment/status', authMiddleware, async (req, res) => {
+  try {
+    const result = await query(
+      'SELECT paid, payment_status FROM users WHERE id = $1',
+      [req.user.user_id]
+    );
+    res.json({
+      paid: result.rows[0]?.paid ?? false,
+      status: result.rows[0]?.payment_status ?? 'pending'
+    });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 function hashPassword(password) {

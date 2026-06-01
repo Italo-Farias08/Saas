@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Aguardando Pagamento — Gold Line</title>
+<link href="https://fonts.googleapis.com/css2?family=DM+Sans:wght@300;400;500&display=swap" rel="stylesheet">
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: 'DM Sans', sans-serif; background: #1a0a12; min-height: 100vh; display: flex; align-items: center; justify-content: center; padding: 20px; }
+  .card { background: #fdf8f5; border-radius: 24px; padding: 40px; max-width: 440px; width: 100%; text-align: center; }
+  .icon { font-size: 56px; margin-bottom: 16px; }
+  h1 { font-size: 24px; color: #3d1a2a; margin-bottom: 8px; }
+  p { color: #9e7b8a; font-size: 14px; line-height: 1.6; }
+  .pix-box { background: #f5f0ff; border: 2px dashed #e91e8c; border-radius: 16px; padding: 24px; margin: 24px 0; }
+  .pix-value { font-size: 36px; font-weight: 700; color: #e91e8c; margin-bottom: 4px; }
+  .pix-label { font-size: 12px; color: #9e7b8a; text-transform: uppercase; letter-spacing: 1px; margin-bottom: 16px; }
+  .pix-key-label { font-size: 11px; color: #9e7b8a; margin-bottom: 6px; }
+  .pix-key { font-size: 18px; font-weight: 600; color: #3d1a2a; background: white; padding: 12px 20px; border-radius: 10px; border: 1px solid #f0e0e8; cursor: pointer; transition: all 0.2s; }
+  .pix-key:hover { background: #fce8f0; }
+  .pix-name { font-size: 12px; color: #9e7b8a; margin-top: 8px; }
+  .btn-copy { width: 100%; padding: 14px; background: linear-gradient(135deg, #e91e8c, #ad1457); color: white; border: none; border-radius: 12px; font-size: 15px; font-weight: 500; cursor: pointer; margin-top: 8px; font-family: 'DM Sans', sans-serif; }
+  .status-box { display: flex; align-items: center; gap: 10px; justify-content: center; padding: 14px; background: #fff8e1; border-radius: 12px; margin-top: 20px; }
+  .status-dot { width: 10px; height: 10px; background: #f59e0b; border-radius: 50%; animation: pulse 1.5s ease-in-out infinite; }
+  .status-text { font-size: 13px; color: #92400e; }
+  @keyframes pulse { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:0.5;transform:scale(1.3)} }
+  .approved { display: none; background: #e8f8ef; border-radius: 12px; padding: 20px; margin-top: 20px; }
+  .approved p { color: #0d6e3a; font-weight: 500; }
+</style>
+</head>
+<body>
+<div class="card">
+  <div class="icon">💸</div>
+  <h1>Quase lá!</h1>
+  <p>Faça o PIX abaixo para ativar seu site. Após o pagamento, seu acesso será liberado em até <strong>5 minutos</strong>.</p>
+
+  <div class="pix-box">
+    <div class="pix-value" id="pix-value">R$ 29,90</div>
+    <div class="pix-label">Valor único — acesso vitalício</div>
+    <div class="pix-key-label">Chave PIX</div>
+    <div class="pix-key" id="pix-key" onclick="copyKey()">carregando...</div>
+    <div class="pix-name" id="pix-name"></div>
+    <button class="btn-copy" onclick="copyKey()">📋 Copiar chave PIX</button>
+  </div>
+
+  <div class="status-box">
+    <div class="status-dot"></div>
+    <span class="status-text">Aguardando confirmação do pagamento...</span>
+  </div>
+
+  <div class="approved" id="approved-box">
+    <p>✅ Pagamento confirmado! Redirecionando...</p>
+  </div>
+</div>
+
+<script>
+  const API = '';
+  const token = localStorage.getItem('token');
+  if (!token) window.location.href = '/login';
+
+  async function loadPixInfo() {
+    const res = await fetch(`${API}/api/payment/pix-info`, {
+      headers: { Authorization: `Bearer ${token}` }
+    });
+    const data = await res.json();
+    if (data.paid) { window.location.href = '/admin'; return; }
+    document.getElementById('pix-key').textContent = data.pixKey;
+    document.getElementById('pix-name').textContent = `Nome: ${data.pixName}`;
+    document.getElementById('pix-value').textContent = `R$ ${data.value.toFixed(2).replace('.', ',')}`;
+  }
+
+  function copyKey() {
+    const key = document.getElementById('pix-key').textContent;
+    navigator.clipboard.writeText(key);
+    document.querySelector('.btn-copy').textContent = '✅ Chave copiada!';
+    setTimeout(() => document.querySelector('.btn-copy').textContent = '📋 Copiar chave PIX', 2000);
+  }
+
+  // Verifica a cada 10 segundos se foi aprovado
+  async function checkStatus() {
+    try {
+      const res = await fetch(`${API}/api/payment/status`, {
+        headers: { Authorization: `Bearer ${token}` }
+      });
+      const data = await res.json();
+      if (data.paid) {
+        document.getElementById('approved-box').style.display = 'block';
+        setTimeout(() => window.location.href = '/admin', 2000);
+      }
+    } catch (e) {}
+  }
+
+  loadPixInfo();
+  setInterval(checkStatus, 10000);
+</script>
+</body>
+</html>
