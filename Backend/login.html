@@ -739,15 +739,9 @@ document.addEventListener('keydown', e => {
     else register();
   }
 });
-
-if (localStorage.getItem('token')) // No final do register(), troca window.location.href = '/admin' por:
-window.location.href = '/payment/pending';
-// No login(), após salvar o token:
-const statusRes = await fetch(`${API}/api/payment/status`, {
-  headers: { Authorization: `Bearer ${data.token}` }
-});
-const { paid } = await statusRes.json();
-window.location.href = paid ? '/admin' : '/payment/pending';
+if (localStorage.getItem('token')) {
+  window.location.href = '/payment/pending';
+}
 </script>
 </body>
 </html>
