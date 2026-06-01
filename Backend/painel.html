@@ -131,7 +131,7 @@
           ` : `
             <a class="btn-zap" href="https://wa.me/5581991204180?text=Olá%20${encodeURIComponent(u.name)}!" target="_blank">💬 Contato</a>
           `}
-          <button class="btn-delete" onclick="deletar(${u.id}, '${u.name}')">🗑️ Deletar</button>
+          <button class="btn-delete" onclick="deletar(${u.id})">🗑️ Deletar</button>
         </div>
       </div>
     `).join('');
@@ -153,11 +153,8 @@
     }
   }
 
-  async function deletar(userId, nome) {
-    if (!confirm(`Deletar o site de "${nome}"? Isso é irreversível!`)) return;
-    const res = await fetch(`${API}/api/admin/site/${userId}?secret=${secret}`, {
-      method: 'DELETE'
-    });
+  async function deletar(userId) {
+    if (!confirm('Deletar este site? Isso é irreversível!')) return;
     const data = await res.json();
     if (data.success) {
       todos = todos.filter(u => u.id !== userId);
