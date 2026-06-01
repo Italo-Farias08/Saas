@@ -92,11 +92,13 @@ async function buildSiteConfig(userId) {
     photos: photosRes.rows.map(p => ({
       id: p.id, url: p.url, caption: p.caption, type: p.type
     })),
-    milestones: milestonesRes.rows.map(m => ({
-      id: m.id,
-      date: m.date ? m.date.toISOString().split('T')[0] : '',
-      title: m.title, description: m.description, icon: m.icon
-    })),
+  milestones: milestonesRes.rows.map(m => ({
+  id: m.id,
+  date: m.date ? m.date.toISOString().split('T')[0] : '',
+  title: m.title, description: m.description, icon: m.icon,
+  photoUrl: m.photo_url || '',
+  photoCaption: m.photo_caption || ''
+})),
     playlist: playlistRes.rows.map(p => ({
       id: p.id, title: p.title, artist: p.artist, youtubeId: p.youtube_id
     })),
@@ -173,9 +175,9 @@ async function saveSiteConfig(userId, body) {
     for (let i = 0; i < cfg.milestones.length; i++) {
       const m = cfg.milestones[i];
       await query(
-        'INSERT INTO milestones (user_id, date, title, description, icon, position) VALUES ($1,$2,$3,$4,$5,$6)',
-        [userId, m.date, m.title, m.description || '', m.icon || '💘', i + 1]
-      );
+  'INSERT INTO milestones (user_id, date, title, description, icon, position, photo_url, photo_caption) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+  [userId, m.date, m.title, m.description || '', m.icon || '💘', i + 1, m.photoUrl || '', m.photoCaption || '']
+);
     }
   }
 
