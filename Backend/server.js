@@ -30,7 +30,7 @@ const upload = multer({
 
 const PIX_KEY = process.env.PIX_KEY || 'goldlinevsa@gmail.com';
 const PIX_NAME = process.env.PIX_NAME || 'Italo Farias';
-const PIX_VALUE = 29.90;
+const PIX_VALUE = 19.90;
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ZinksggZ2';
 
 // Retorna os dados do PIX pro usuário
