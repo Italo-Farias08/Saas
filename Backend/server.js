@@ -66,6 +66,7 @@ async function buildSiteConfig(userId) {
     query('SELECT * FROM playlist WHERE user_id = $1 ORDER BY position', [userId]),
     query('SELECT * FROM quiz_questions WHERE user_id = $1 ORDER BY position', [userId]),
   ]);
+  
 
   const c = cfgRes.rows[0];
   if (!c) return null;
@@ -343,10 +344,11 @@ app.post('/api/site/publish', authMiddleware, async (req, res) => {
 app.get('/api/public/:siteUrl', async (req, res) => {
   try {
     const cfgRes = await query(
-      'SELECT user_id FROM site_configs WHERE site_url = $1 AND published = TRUE',
-      [req.params.siteUrl]
-    );
-    if (!cfgRes.rows.length) return res.status(404).json({ error: 'Site não encontrado' });
+  'SELECT user_id, published FROM site_configs WHERE site_url = $1',
+  [req.params.siteUrl]
+);
+if (!cfgRes.rows.length) return res.status(404).json({ error: 'Site não encontrado' });
+if (!cfgRes.rows[0].published) return res.status(403).json({ error: 'Site ainda não publicado' });
 
     const userId = cfgRes.rows[0].user_id;
 
@@ -369,13 +371,13 @@ app.get('/api/stats', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
 
-    const [cfgRes, photosRes, milestonesRes, viewsRes, userRes] = await Promise.all([
-      query('SELECT start_date, site_url FROM site_configs WHERE user_id = $1', [userId]),
-      query('SELECT COUNT(*) FROM photos WHERE user_id = $1', [userId]),
-      query('SELECT COUNT(*) FROM milestones WHERE user_id = $1', [userId]),
-      query('SELECT count FROM site_views WHERE site_url = $1', ['']),  // placeholder
-      query('SELECT plan FROM users WHERE id = $1', [userId]),
-    ]);
+   const [cfgRes, photosRes, milestonesRes, userRes] = await Promise.all([
+  query('SELECT start_date, site_url FROM site_configs WHERE user_id = $1', [userId]),
+  query('SELECT COUNT(*) FROM photos WHERE user_id = $1', [userId]),
+  query('SELECT COUNT(*) FROM milestones WHERE user_id = $1', [userId]),
+  query('SELECT plan FROM users WHERE id = $1', [userId]),
+]);
+    
 
     const cfg = cfgRes.rows[0];
     const startDate = cfg?.start_date ? new Date(cfg.start_date) : new Date();
