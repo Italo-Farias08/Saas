@@ -67,7 +67,7 @@ app.post('/api/payment/approve', async (req, res) => {
   ['approved', userId]
 );
 await query(
-  'UPDATE site_configs SET published = TRUE WHERE user_id = $1',
+  'UPDATE site_configs SET published = TRUE WHERE user_id = $1::uuid',
   [userId]
 );
 
