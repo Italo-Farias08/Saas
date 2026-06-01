@@ -744,7 +744,13 @@ document.addEventListener('keydown', e => {
   }
 });
 if (localStorage.getItem('token')) {
-  window.location.href = '/payment/pending';
+  fetch(`${API}/api/payment/status`, {
+    headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
+  })
+  .then(r => r.json())
+  .then(data => {
+    window.location.href = data.paid ? '/admin' : '/payment/pending';
+  });
 }
 </script>
 </body>
