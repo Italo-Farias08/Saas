@@ -130,11 +130,11 @@ el.innerHTML = lista.map(u => {
       <div class="actions">
         ${isPending ? `
           <a class="btn-zap" href="https://wa.me/5581991204180?text=Ol%C3%A1%20${nome}!%20Seu%20pagamento%20foi%20confirmado!" target="_blank">💬 Avisar</a>
-          <button class="btn-approve" onclick="aprovar(${u.id})">✅ Aprovar</button>
+          <button class="btn-approve" onclick="aprovar('${u.id}')">✅ Aprovar</button>
         ` : `
           <a class="btn-zap" href="https://wa.me/5581991204180?text=Ol%C3%A1%20${nome}!" target="_blank">💬 Contato</a>
         `}
-        <button class="btn-delete" onclick="deletar(${u.id})">🗑️ Deletar</button>
+        <button class="btn-delete" onclick="deletar('${u.id}')">🗑️ Deletar</button>
       </div>
     </div>
   `;
