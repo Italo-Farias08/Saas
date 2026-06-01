@@ -28,10 +28,10 @@ const upload = multer({
 });
 // ─── Pagamento PIX Manual ─────────────────────────────────────────────────────
 
-const PIX_KEY = process.env.PIX_KEY || 'sua-chave-pix-aqui';
+const PIX_KEY = process.env.PIX_KEY || 'goldlinevsa@gmail.com';
 const PIX_NAME = process.env.PIX_NAME || 'Italo Farias';
 const PIX_VALUE = 29.90;
-const ADMIN_SECRET = process.env.ADMIN_SECRET || 'senha-secreta-sua';
+const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ZinksggZ2';
 
 // Retorna os dados do PIX pro usuário
 app.get('/api/payment/pix-info', authMiddleware, async (req, res) => {
@@ -311,7 +311,7 @@ app.post('/api/auth/register', async (req, res) => {
 
     await query(`
       INSERT INTO site_configs (user_id, couple_names, start_date, site_url, published)
-      VALUES ($1, $2, CURRENT_DATE, $3, TRUE)
+      VALUES ($1, $2, CURRENT_DATE, $3, FALSE)
     `, [user.id, name, siteUrl]);
 
     const token = generateToken();
@@ -449,6 +449,7 @@ app.get('/',        (req, res) => res.sendFile(path.join(__dirname, 'login.html'
 app.get('/login',   (req, res) => res.sendFile(path.join(__dirname, 'login.html')));
 app.get('/admin',   (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/site/:siteUrl', (req, res) => res.sendFile(path.join(__dirname, 'site.html')));
+app.get('/payment/pending', (req, res) => res.sendFile(path.join(__dirname, 'payment.html')));
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;

@@ -699,7 +699,11 @@ async function login() {
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    window.location.href = '/admin';
+    const statusRes = await fetch(`${API}/api/payment/status`, {
+  headers: { Authorization: `Bearer ${data.token}` }
+});
+const { paid } = await statusRes.json();
+window.location.href = paid ? '/admin' : '/payment/pending';
   } catch (e) {
     showAlert(e.message || 'Erro ao fazer login');
   } finally {
@@ -725,7 +729,7 @@ async function register() {
     if (!res.ok) throw new Error(data.error);
     localStorage.setItem('token', data.token);
     localStorage.setItem('user', JSON.stringify(data.user));
-    window.location.href = '/admin';
+    window.location.href = '/payment/pending';
   } catch (e) {
     showAlert(e.message || 'Erro ao criar conta');
   } finally {
