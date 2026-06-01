@@ -136,7 +136,7 @@ async function saveSiteConfig(userId, body) {
     WHERE user_id = $18
   `, [
     cfg.coupleNames    ?? null,
-    cfg.startDate      ?? null,
+    cfg.startDate      || null,
     cfg.heroSubtitle   ?? null,
     cfg.story          ?? null,
     cfg.primaryColor   ?? null,
@@ -148,7 +148,7 @@ async function saveSiteConfig(userId, body) {
     cfg.siteUrl        ?? null,
     cfg.published      ?? null,
     cfg.showCountdown  ?? null,
-    cfg.countdownDate  ?? null,
+    cfg.countdownDate  || null,
     cfg.backgroundEffect ?? null,
     cfg.musicEnabled   ?? null,
     cfg.quizEnabled    ?? null,
