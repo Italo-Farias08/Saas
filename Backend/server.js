@@ -450,6 +450,40 @@ app.get('/login',   (req, res) => res.sendFile(path.join(__dirname, 'login.html'
 app.get('/admin',   (req, res) => res.sendFile(path.join(__dirname, 'admin.html')));
 app.get('/site/:siteUrl', (req, res) => res.sendFile(path.join(__dirname, 'site.html')));
 app.get('/payment/pending', (req, res) => res.sendFile(path.join(__dirname, 'payment.html')));
+app.get('/painel', (req, res) => res.sendFile(path.join(__dirname, 'painel.html')));
+
+app.get('/api/admin/pendentes', async (req, res) => {
+  try {
+    const { secret } = req.query;
+    if (secret !== ADMIN_SECRET) return res.status(401).json({ error: 'Não autorizado' });
+    const result = await query(`
+      SELECT u.id, u.name, u.email, u.created_at, u.paid, u.payment_status
+      FROM users u
+      ORDER BY u.created_at DESC
+    `);
+    res.json(result.rows);
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
+
+app.delete('/api/admin/site/:userId', async (req, res) => {
+  try {
+    const { secret } = req.query;
+    if (secret !== ADMIN_SECRET) return res.status(401).json({ error: 'Não autorizado' });
+    const { userId } = req.params;
+    await query('DELETE FROM photos WHERE user_id = $1', [userId]);
+    await query('DELETE FROM milestones WHERE user_id = $1', [userId]);
+    await query('DELETE FROM playlist WHERE user_id = $1', [userId]);
+    await query('DELETE FROM quiz_questions WHERE user_id = $1', [userId]);
+    await query('DELETE FROM site_configs WHERE user_id = $1', [userId]);
+    await query('DELETE FROM sessions WHERE user_id = $1', [userId]);
+    await query('DELETE FROM users WHERE id = $1', [userId]);
+    res.json({ success: true });
+  } catch (err) {
+    res.status(500).json({ error: 'Erro interno' });
+  }
+});
 
 // ─── Start ────────────────────────────────────────────────────────────────────
 const PORT = process.env.PORT || 3000;
