@@ -63,9 +63,13 @@ app.post('/api/payment/approve', async (req, res) => {
     }
 
     await query(
-      'UPDATE users SET paid = TRUE, payment_status = $1 WHERE id = $2',
-      ['approved', userId]
-    );
+  'UPDATE users SET paid = TRUE, payment_status = $1 WHERE id = $2',
+  ['approved', userId]
+);
+await query(
+  'UPDATE site_configs SET published = TRUE WHERE user_id = $1',
+  [userId]
+);
 
     res.json({ success: true, message: `Usuário ${userId} aprovado!` });
   } catch (err) {
