@@ -2,7 +2,6 @@ const express = require('express');
 const path = require('path');
 const crypto = require('crypto');
 const multer = require('multer');
-const fs = require('fs');
 const { Pool } = require('pg');
 
 const app = express();
@@ -11,36 +10,16 @@ app.use(express.urlencoded({ extended: true, limit: '50mb' }));
 app.use(express.static('.'));
 
 // ─── PostgreSQL ───────────────────────────────────────────────────────────────
-// Configure via variável de ambiente DATABASE_URL ou as variáveis individuais abaixo.
-// Exemplo: DATABASE_URL=postgresql://user:senha@localhost:5432/amoreterno
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  // Caso prefira variáveis separadas (se DATABASE_URL não estiver definida):
-  // host:     process.env.DB_HOST     || 'localhost',
-  // port:     process.env.DB_PORT     || 5432,
-  // database: process.env.DB_NAME     || 'amoreterno',
-  // user:     process.env.DB_USER     || 'postgres',
-  // password: process.env.DB_PASSWORD || '',
   ssl: process.env.DB_SSL === 'true' ? { rejectUnauthorized: false } : false,
 });
 
-// Helper: executa query com client do pool
 const query = (text, params) => pool.query(text, params);
 
-// ─── Uploads ──────────────────────────────────────────────────────────────────
-const uploadsDir = path.join(__dirname, 'uploads');
-if (!fs.existsSync(uploadsDir)) fs.mkdirSync(uploadsDir, { recursive: true });
-app.use('/uploads', express.static(uploadsDir));
-
-const storage = multer.diskStorage({
-  destination: (req, file, cb) => cb(null, uploadsDir),
-  filename: (req, file, cb) => {
-    const ext = path.extname(file.originalname);
-    cb(null, `${Date.now()}-${Math.random().toString(36).slice(2)}${ext}`);
-  }
-});
+// ─── Multer — memória (sem disco) ─────────────────────────────────────────────
 const upload = multer({
-  storage,
+  storage: multer.memoryStorage(),
   limits: { fileSize: 10 * 1024 * 1024 },
   fileFilter: (req, file, cb) => {
     if (file.mimetype.startsWith('image/')) cb(null, true);
@@ -57,7 +36,11 @@ function generateToken() {
   return crypto.randomBytes(32).toString('hex');
 }
 
-// Monta o objeto siteConfig a partir das linhas do banco
+function fileToBase64(file) {
+  return `data:${file.mimetype};base64,${file.buffer.toString('base64')}`;
+}
+
+// ─── Build Site Config ────────────────────────────────────────────────────────
 async function buildSiteConfig(userId) {
   const [cfgRes, photosRes, milestonesRes, playlistRes, quizRes] = await Promise.all([
     query('SELECT * FROM site_configs WHERE user_id = $1', [userId]),
@@ -66,7 +49,6 @@ async function buildSiteConfig(userId) {
     query('SELECT * FROM playlist WHERE user_id = $1 ORDER BY position', [userId]),
     query('SELECT * FROM quiz_questions WHERE user_id = $1 ORDER BY position', [userId]),
   ]);
-  
 
   const c = cfgRes.rows[0];
   if (!c) return null;
@@ -92,13 +74,13 @@ async function buildSiteConfig(userId) {
     photos: photosRes.rows.map(p => ({
       id: p.id, url: p.url, caption: p.caption, type: p.type
     })),
-  milestones: milestonesRes.rows.map(m => ({
-  id: m.id,
-  date: m.date ? m.date.toISOString().split('T')[0] : '',
-  title: m.title, description: m.description, icon: m.icon,
-  photoUrl: m.photo_url || '',
-  photoCaption: m.photo_caption || ''
-})),
+    milestones: milestonesRes.rows.map(m => ({
+      id: m.id,
+      date: m.date ? m.date.toISOString().split('T')[0] : '',
+      title: m.title, description: m.description, icon: m.icon,
+      photoUrl: m.photo_url || '',
+      photoCaption: m.photo_caption || ''
+    })),
     playlist: playlistRes.rows.map(p => ({
       id: p.id, title: p.title, artist: p.artist, youtubeId: p.youtube_id
     })),
@@ -110,11 +92,10 @@ async function buildSiteConfig(userId) {
   };
 }
 
-// Persiste o siteConfig vindo do cliente de volta ao banco
+// ─── Save Site Config ─────────────────────────────────────────────────────────
 async function saveSiteConfig(userId, body) {
   const cfg = body;
 
-  // Campos simples na tabela site_configs
   await query(`
     UPDATE site_configs SET
       couple_names      = COALESCE($1, couple_names),
@@ -137,27 +118,27 @@ async function saveSiteConfig(userId, body) {
       updated_at        = NOW()
     WHERE user_id = $18
   `, [
-    cfg.coupleNames    ?? null,
-    cfg.startDate      || null,
-    cfg.heroSubtitle   ?? null,
-    cfg.story          ?? null,
-    cfg.primaryColor   ?? null,
-    cfg.secondaryColor ?? null,
-    cfg.accentColor    ?? null,
-    cfg.theme          ?? null,
-    cfg.profilePhoto   ?? null,
-    cfg.message        ?? null,
-    cfg.siteUrl        ?? null,
-    cfg.published      ?? null,
-    cfg.showCountdown  ?? null,
-    cfg.countdownDate  || null,
+    cfg.coupleNames      ?? null,
+    cfg.startDate        || null,
+    cfg.heroSubtitle     ?? null,
+    cfg.story            ?? null,
+    cfg.primaryColor     ?? null,
+    cfg.secondaryColor   ?? null,
+    cfg.accentColor      ?? null,
+    cfg.theme            ?? null,
+    cfg.profilePhoto     ?? null,
+    cfg.message          ?? null,
+    cfg.siteUrl          ?? null,
+    cfg.published        ?? null,
+    cfg.showCountdown    ?? null,
+    cfg.countdownDate    || null,
     cfg.backgroundEffect ?? null,
-    cfg.musicEnabled   ?? null,
-    cfg.quizEnabled    ?? null,
+    cfg.musicEnabled     ?? null,
+    cfg.quizEnabled      ?? null,
     userId,
   ]);
 
-  // Fotos — substitui todas se enviadas
+  // Fotos
   if (Array.isArray(cfg.photos)) {
     await query('DELETE FROM photos WHERE user_id = $1', [userId]);
     for (let i = 0; i < cfg.photos.length; i++) {
@@ -175,9 +156,9 @@ async function saveSiteConfig(userId, body) {
     for (let i = 0; i < cfg.milestones.length; i++) {
       const m = cfg.milestones[i];
       await query(
-  'INSERT INTO milestones (user_id, date, title, description, icon, position, photo_url, photo_caption) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
-  [userId, m.date, m.title, m.description || '', m.icon || '💘', i + 1, m.photoUrl || '', m.photoCaption || '']
-);
+        'INSERT INTO milestones (user_id, date, title, description, icon, position, photo_url, photo_caption) VALUES ($1,$2,$3,$4,$5,$6,$7,$8)',
+        [userId, m.date, m.title, m.description || '', m.icon || '💘', i + 1, m.photoUrl || '', m.photoCaption || '']
+      );
     }
   }
 
@@ -256,7 +237,6 @@ app.post('/api/auth/register', async (req, res) => {
 
     const slug = name.toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-');
 
-    // Garante slug único
     let siteUrl = slug;
     const slugCheck = await query('SELECT id FROM site_configs WHERE site_url = $1', [slug]);
     if (slugCheck.rows.length) siteUrl = `${slug}-${Date.now()}`;
@@ -268,8 +248,8 @@ app.post('/api/auth/register', async (req, res) => {
     const user = userRes.rows[0];
 
     await query(`
-      INSERT INTO site_configs (user_id, couple_names, start_date, site_url)
-      VALUES ($1, $2, CURRENT_DATE, $3)
+      INSERT INTO site_configs (user_id, couple_names, start_date, site_url, published)
+      VALUES ($1, $2, CURRENT_DATE, $3, TRUE)
     `, [user.id, name, siteUrl]);
 
     const token = generateToken();
@@ -292,16 +272,17 @@ app.post('/api/auth/logout', authMiddleware, async (req, res) => {
   }
 });
 
-// ─── Upload ───────────────────────────────────────────────────────────────────
+// ─── Upload — base64 no banco ─────────────────────────────────────────────────
 app.post('/api/upload', authMiddleware, upload.single('image'), (req, res) => {
   if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
-  res.json({ url: `/uploads/${req.file.filename}`, filename: req.file.filename });
+  const url = fileToBase64(req.file);
+  res.json({ url, filename: req.file.originalname });
 });
 
 app.post('/api/upload/profile', authMiddleware, upload.single('image'), async (req, res) => {
   try {
     if (!req.file) return res.status(400).json({ error: 'Nenhuma imagem enviada' });
-    const url = `/uploads/${req.file.filename}`;
+    const url = fileToBase64(req.file);
     await query('UPDATE site_configs SET profile_photo = $1 WHERE user_id = $2', [url, req.user.user_id]);
     res.json({ url });
   } catch (err) {
@@ -346,15 +327,14 @@ app.post('/api/site/publish', authMiddleware, async (req, res) => {
 app.get('/api/public/:siteUrl', async (req, res) => {
   try {
     const cfgRes = await query(
-  'SELECT user_id, published FROM site_configs WHERE site_url = $1',
-  [req.params.siteUrl]
-);
-if (!cfgRes.rows.length) return res.status(404).json({ error: 'Site não encontrado' });
-if (!cfgRes.rows[0].published) return res.status(403).json({ error: 'Site ainda não publicado' });
+      'SELECT user_id, published FROM site_configs WHERE site_url = $1',
+      [req.params.siteUrl]
+    );
+    if (!cfgRes.rows.length) return res.status(404).json({ error: 'Site não encontrado' });
+    if (!cfgRes.rows[0].published) return res.status(403).json({ error: 'Site ainda não publicado' });
 
     const userId = cfgRes.rows[0].user_id;
 
-    // Incrementa contador de views
     await query(`
       INSERT INTO site_views (site_url, count) VALUES ($1, 1)
       ON CONFLICT (site_url) DO UPDATE SET count = site_views.count + 1
@@ -373,20 +353,18 @@ app.get('/api/stats', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
 
-   const [cfgRes, photosRes, milestonesRes, userRes] = await Promise.all([
-  query('SELECT start_date, site_url FROM site_configs WHERE user_id = $1', [userId]),
-  query('SELECT COUNT(*) FROM photos WHERE user_id = $1', [userId]),
-  query('SELECT COUNT(*) FROM milestones WHERE user_id = $1', [userId]),
-  query('SELECT plan FROM users WHERE id = $1', [userId]),
-]);
-    
+    const [cfgRes, photosRes, milestonesRes, userRes] = await Promise.all([
+      query('SELECT start_date, site_url FROM site_configs WHERE user_id = $1', [userId]),
+      query('SELECT COUNT(*) FROM photos WHERE user_id = $1', [userId]),
+      query('SELECT COUNT(*) FROM milestones WHERE user_id = $1', [userId]),
+      query('SELECT plan FROM users WHERE id = $1', [userId]),
+    ]);
 
     const cfg = cfgRes.rows[0];
     const startDate = cfg?.start_date ? new Date(cfg.start_date) : new Date();
     const diffMs = Date.now() - startDate.getTime();
     const days = Math.max(0, Math.floor(diffMs / (1000 * 60 * 60 * 24)));
 
-    // Views reais com o site_url correto
     const viewsReal = cfg?.site_url
       ? await query('SELECT count FROM site_views WHERE site_url = $1', [cfg.site_url])
       : { rows: [] };
