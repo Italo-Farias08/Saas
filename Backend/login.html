@@ -747,8 +747,16 @@ if (localStorage.getItem('token')) {
   fetch(`${API}/api/payment/status`, {
     headers: { Authorization: `Bearer ${localStorage.getItem('token')}` }
   })
-  .then(r => r.json())
+  .then(r => {
+    if (r.status === 401) {
+      localStorage.removeItem('token');
+      localStorage.removeItem('user');
+      return null;
+    }
+    return r.json();
+  })
   .then(data => {
+    if (!data) return;
     window.location.href = data.paid ? '/admin' : '/payment/pending';
   });
 }
