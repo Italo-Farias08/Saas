@@ -284,6 +284,57 @@ bash
     0%,80%,100%{transform:scale(0);opacity:0.4}
     40%{transform:scale(1);opacity:1}
   }
+  .demo-divider {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 20px 0;
+}
+.demo-divider::before,
+.demo-divider::after {
+  content: '';
+  flex: 1;
+  height: 1px;
+  background: #f0e0e8;
+}
+.demo-divider span {
+  font-size: 12px;
+  color: #b0909f;
+  white-space: nowrap;
+}
+
+.btn-demo {
+  width: 100%;
+  padding: 14px;
+  background: transparent;
+  color: var(--rose);
+  border: 1.5px solid #f4b8d4;
+  border-radius: 12px;
+  font-size: 14px;
+  font-weight: 500;
+  cursor: pointer;
+  font-family: 'DM Sans', sans-serif;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  transition: all 0.3s;
+  text-decoration: none;
+}
+.btn-demo:hover {
+  background: rgba(233,30,140,0.07);
+  border-color: var(--rose);
+}
+.demo-badge {
+  font-size: 10px;
+  background: rgba(233,30,140,0.1);
+  color: var(--rose-dark);
+  padding: 2px 7px;
+  border-radius: 20px;
+  font-weight: 600;
+  letter-spacing: 0.5px;
+  text-transform: uppercase;
+}
 
   .terms {
     margin-top: 24px;
@@ -553,8 +604,20 @@ bash
             <input type="password" id="login-password" placeholder="••••••••" autocomplete="current-password">
           </div>
           <button class="btn-primary" onclick="login()" id="login-btn">Entrar na minha conta</button>
-        </div>
+          <!-- Após o botão "Entrar na minha conta" -->
+<button class="btn-primary" onclick="login()" id="login-btn">Entrar na minha conta</button>
 
+<div class="demo-divider">
+  <span>ou</span>
+</div>
+
+<a class="btn-demo" href="demo.html">
+  <span>👁️</span>
+  Ver site de demonstração
+  <span class="demo-badge">Grátis</span>
+</a>
+        </div>
+        
         <!-- REGISTER -->
         <div id="register-form" class="form-section">
           <div class="field">
