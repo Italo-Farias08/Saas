@@ -33,7 +33,6 @@ const PIX_NAME = process.env.PIX_NAME || 'Italo Farias';
 const PIX_VALUE = 19.90;
 const ADMIN_SECRET = process.env.ADMIN_SECRET || 'ZinksggZ2';
 
-// Retorna os dados do PIX pro usuário
 app.get('/api/payment/pix-info', authMiddleware, async (req, res) => {
   try {
     const userId = req.user.user_id;
@@ -53,7 +52,6 @@ app.get('/api/payment/pix-info', authMiddleware, async (req, res) => {
   }
 });
 
-// Você chama essa rota pra aprovar o pagamento de um usuário
 app.post('/api/payment/approve', async (req, res) => {
   try {
     const { userId, secret } = req.body;
