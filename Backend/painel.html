@@ -124,7 +124,6 @@ el.innerHTML = lista.map(u => {
       <div class="card-info">
         <h3>${u.name}</h3>
         <p>${u.email}</p>
-        <p style="font-size:11px;color:#b0909f;margin-top:2px;">Cadastrado em: ${new Date(u.created_at).toLocaleString('pt-BR')}</p>
         <span class="badge ${u.paid ? 'approved' : 'pending'}">${u.paid ? '✅ Aprovado' : '⏳ Pendente'}</span>
       </div>
       <div class="actions">
